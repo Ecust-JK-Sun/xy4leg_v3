@@ -15,7 +15,7 @@ from isaaclab.sensors import ContactSensorCfg, TiledCameraCfg
 from isaaclab.sim import SimulationCfg
 from isaaclab.utils import configclass
 
-from isaaclab_tasks.direct.xy4legv2_amp.controllers_5dof_gripper import actuators_implicit
+from .controllers_5dof_gripper import actuators_implicit
 
 
 _V2_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "xy4legv2_amp")
