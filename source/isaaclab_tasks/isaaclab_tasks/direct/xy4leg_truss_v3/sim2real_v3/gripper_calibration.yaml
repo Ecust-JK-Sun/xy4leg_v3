@@ -1,0 +1,36 @@
+# Per-gripper calibration for V3 sim2real playback.
+#
+# Leg keys are in hardware order. The old V2 close_pos values are kept here
+# because each real gripper motor has a different zero/span. V3 currently uses
+# the torque fields for command output; close_pos is retained for feedback
+# mapping to the simulated gripper angle range below.
+
+sim_angle:
+  open_deg: -14.0
+  closed_deg: -30.0
+
+legs:
+  LB:
+    close_pos: -6.96
+    torque_sign: -1.0
+    torque_scale: 1.0
+    deadband: 0.05
+    max_torque: 1.0
+  LF:
+    close_pos: -7.38
+    torque_sign: -1.0
+    torque_scale: 1.0
+    deadband: 0.05
+    max_torque: 1.0
+  RB:
+    close_pos: -10.15
+    torque_sign: -1.0
+    torque_scale: 1.0
+    deadband: 0.05
+    max_torque: 1.0
+  RF:
+    close_pos: -7.0
+    torque_sign: -1.0
+    torque_scale: 1.0
+    deadband: 0.05
+    max_torque: 1.0

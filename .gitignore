@@ -1,0 +1,36 @@
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/outputs/
+**/videos/
+**/wandb/
+**/.neptune/
+*.log
+*.log.*
+*.tmp
+
+# Keep only selected checkpoints committed explicitly.
+logs/rsl_rl/**
+!logs/rsl_rl/xy4leg_gripper_truss_v3_walk_sim2real/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_walk_sim2real/2026-07-24_18-58-21_deployable_interface/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_walk_sim2real/2026-07-24_18-58-21_deployable_interface/model_28800.pt
+!logs/rsl_rl/xy4leg_gripper_truss_v3_teacher/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_teacher/2026-07-21_22-36-26_learn_gripper/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_teacher/2026-07-21_22-36-26_learn_gripper/model_36000.pt
+!logs/rsl_rl/xy4leg_gripper_truss_v3_teacher_sim2real/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_teacher_sim2real/2026-07-26_21-09-53_sim2real_ft_from_teacher36000/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_teacher_sim2real/2026-07-26_21-09-53_sim2real_ft_from_teacher36000/model_20000.pt
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_oracle_bar_sim2real/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_oracle_bar_sim2real/2026-07-27_14-17-41_from_teacher_sim2real20000/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_oracle_bar_sim2real/2026-07-27_14-17-41_from_teacher_sim2real20000/model_13500.pt
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/2026-07-27_19-37-56_depth_from_oracle_sim2real13500/
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/2026-07-27_19-37-56_depth_from_oracle_sim2real13500/model_24000.pt
+!logs/rsl_rl/xy4leg_truss_v3_depth_bar/
+!logs/rsl_rl/xy4leg_truss_v3_depth_bar/depth_bar_estimator_l2_055-070_l3_060-080_l4_065-090.pt
+
+# USD assets should be handled through Git LFS or external storage.
+**/*.usd
+**/*.usda
+**/*.usdc
+**/*.usdz
