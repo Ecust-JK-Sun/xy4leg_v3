@@ -3,21 +3,27 @@ import json
 import numpy as np
 import threading
 import time
-from scipy.spatial.transform import Rotation as R
 
 def quaternion_to_euler(qx, qy, qz, qw):
     try:
+        from scipy.spatial.transform import Rotation as R
+
         r = R.from_quat([qx, qy, qz, qw])
         return r.as_euler('xyz', degrees=True)
     except:
         return [0, 0, 0]
 
 class RadarReceiver:
-    def __init__(self, ip='0.0.0.0', port=8888):
+    def __init__(self, ip='0.0.0.0', port=8888, source_ip=None, stats=None):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((ip, port))
         # 设置为非阻塞模式，方便线程退出
-        self.sock.settimeout(0.0001)
+        self.sock.settimeout(0.05)
+        self.source_ip = source_ip
+        self.stats = stats
+        self.last_received_at = None
+        self.last_sender_timestamp = None
+        self.error = None
         
         self.running = False
         self.lock = threading.Lock()
@@ -43,7 +49,7 @@ class RadarReceiver:
     def stop(self):
         self.running = False
         if self.thread.is_alive():
-            self.thread.join()
+            self.thread.join(timeout=1.0)
         self.sock.close()
         print("[INFO] Radar Receiver stopped")
 
@@ -51,29 +57,72 @@ class RadarReceiver:
         while self.running:
             try:
                 # 接收数据 (缓冲区大小 1024 字节足够了)
-                data_bytes, addr = self.sock.recvfrom(1024)
-                
-                json_str = data_bytes.decode('utf-8')
-                data = json.loads(json_str)
-
-                # 解析并更新
+                data_bytes, addr = self.sock.recvfrom(4096)
+                if self.source_ip is not None and addr[0] != self.source_ip:
+                    continue
+                data = self._decode_packet(data_bytes)
                 with self.lock:
-                    self.latest_data["timestamp"] = data.get('t', 0.0)
-                    self.latest_data["pos"] = np.array(data.get("p", [0,0,0]))
-                    self.latest_data["quat"] = np.array(data.get("q", [0,0,0,1]))
-                    self.latest_data["lin_vel"] = np.array(data.get("v", [0,0,0]))
-                    self.latest_data["ang_vel"] = np.array(data.get("w", [0,0,0]))
+                    stamp = data["timestamp"]
+                    if stamp is not None:
+                        if self.last_sender_timestamp is not None and stamp <= self.last_sender_timestamp:
+                            if self.stats is not None:
+                                self.stats.tick("radar_out_of_order")
+                            continue
+                        self.last_sender_timestamp = stamp
+                    self.latest_data = data
+                    self.last_received_at = time.monotonic()
+                if self.stats is not None:
+                    self.stats.tick("radar")
 
             except socket.timeout:
                 continue
-            except (json.JSONDecodeError, Exception) as e:
-                # print(f"[WARN] Receive error: {e}")
-                pass
+            except (ValueError, TypeError, UnicodeDecodeError, KeyError):
+                # Malformed packets never refresh the last valid observation's age.
+                if self.stats is not None:
+                    self.stats.tick("radar_invalid")
+                continue
+            except OSError as exc:
+                if self.running:
+                    self.error = exc
+                break
 
-    def get_data(self):
+    @staticmethod
+    def _decode_packet(payload):
+        data = json.loads(payload.decode("utf-8"))
+        if not isinstance(data, dict) or "q" not in data or "w" not in data:
+            raise ValueError("Radar packet must include quaternion q and angular velocity w")
+        result = {}
+        for key, output, count, default in (("q", "quat", 4, None), ("w", "ang_vel", 3, None),
+                                             ("v", "lin_vel", 3, [0, 0, 0]), ("p", "pos", 3, [0, 0, 0])):
+            value = np.asarray(data.get(key, default), dtype=np.float32)
+            if value.shape != (count,) or not np.isfinite(value).all():
+                raise ValueError(f"Invalid radar field {key}")
+            result[output] = value
+        norm = np.linalg.norm(result["quat"])
+        if norm < 1e-6 or not np.isfinite(norm):
+            raise ValueError("Invalid radar quaternion")
+        result["quat"] /= norm
+        stamp = float(data["t"]) if "t" in data else None
+        if stamp is not None and not np.isfinite(stamp):
+            raise ValueError("Invalid radar timestamp")
+        result["timestamp"] = stamp
+        return result
+
+    def get_data(self, max_age_s=None, now=None):
         """获取最新的数据副本"""
         with self.lock:
-            return self.latest_data.copy()
+            if self.error is not None:
+                raise RuntimeError(f"Radar receiver failed: {self.error}")
+            if max_age_s is not None:
+                if self.last_received_at is None:
+                    raise RuntimeError("Radar has not received a valid packet")
+                age = (time.monotonic() if now is None else now) - self.last_received_at
+                if age < 0 or age > max_age_s:
+                    raise RuntimeError(f"Radar observation is stale ({age:.3f}s old)")
+                if getattr(self, "stats", None) is not None:
+                    self.stats.observe("radar_age_ms", age * 1000.)
+            return {key: value.copy() if isinstance(value, np.ndarray) else value
+                    for key, value in self.latest_data.items()}
 
 # 保留脚本直接运行的功能用于测试
 def main():

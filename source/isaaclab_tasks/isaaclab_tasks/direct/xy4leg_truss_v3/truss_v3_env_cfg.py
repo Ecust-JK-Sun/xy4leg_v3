@@ -343,6 +343,17 @@ class XY4LegTrussV3TeacherEnvCfg(DirectRLEnvCfg):
     depth_bar_heightmap_x_range = (-0.85, 1.45)
     depth_bar_heightmap_y_range = (-0.45, 0.45)
     depth_bar_heightmap_z_range = (-0.85, 0.25)
+    # Interface fields restored by sim2real_v3 before constructing its helper env.
+    # Keep legacy heightmap defaults; do not change training behavior here.
+    depth_bar_input_mode = "heightmap"
+    depth_bar_depth_crop_max_depth = 1.5
+    depth_bar_memory_enabled = False
+    depth_bar_memory_duration_s = 1.6
+    depth_bar_memory_nominal_forward_velocity = 0.035
+    depth_bar_memory_fallback_delta_b = (2.4, 0.0, -0.5)
+    depth_bar_raw_visible_x_range = (-0.05, 0.65)
+    depth_bar_raw_visible_y_range = (-0.45, 0.45)
+    depth_bar_raw_visible_z_range = (-0.85, 0.25)
     pass_margin = 0.05
     root_pass_margin = 0.15
     stable_landing_s = 0.40

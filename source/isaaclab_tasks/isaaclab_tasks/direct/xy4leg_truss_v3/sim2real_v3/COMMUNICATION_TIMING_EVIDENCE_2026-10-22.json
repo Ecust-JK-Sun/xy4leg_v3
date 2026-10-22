@@ -1,0 +1,505 @@
+{
+  "date": "2026-10-22",
+  "method": "CPU-only. Actual play_real.main definitions with synthetic gym/runner/sensors/controllers; actor and TorchScript estimator weights are real. No Isaac Sim, CUDA or hardware was started. Serial writes were mocked and had no UART wire delay. Fake SDK read blocks 33.3 ms; nominal gain/command encoders and 24 inter-command sleeps are unchanged.",
+  "before": {
+    "before_missing_rx_ms": [
+      127.83549097366631,
+      127.30705901049078,
+      127.23604700295255
+    ],
+    "gpu_available": false,
+    "torch": "2.7.0+cu128",
+    "default_torch_threads": 24,
+    "cpu_inference": [
+      {
+        "threads": 24,
+        "actor": {
+          "mean_ms": 2.468572497794715,
+          "p95_ms": 5.995764979161322,
+          "max_ms": 6.001368979923427,
+          "samples": 12
+        },
+        "depth_estimator": {
+          "mean_ms": 0.24476106045767665,
+          "p95_ms": 0.25672599440440536,
+          "max_ms": 0.2610879600979388,
+          "samples": 12
+        }
+      },
+      {
+        "threads": 1,
+        "actor": {
+          "mean_ms": 0.06088332913350314,
+          "p95_ms": 0.09618402691558003,
+          "max_ms": 0.20718295127153397,
+          "samples": 200
+        },
+        "depth_estimator": {
+          "mean_ms": 0.16902950184885412,
+          "p95_ms": 0.17632200615480542,
+          "max_ms": 0.3216239856556058,
+          "samples": 200
+        }
+      }
+    ]
+  },
+  "after_empty_four_port_rx": {
+    "mean_ms": 0.005037529568653554,
+    "p95_ms": 0.0053879921324551105,
+    "max_ms": 0.01728598726913333,
+    "samples": 1000
+  },
+  "after_cpu_threads_1": {
+    "actor": {
+      "mean_ms": 0.03400522007723339,
+      "p95_ms": 0.03518554440233856,
+      "max_ms": 0.06006000330671668,
+      "samples": 400
+    },
+    "estimator": {
+      "mean_ms": 0.17220805122633465,
+      "p95_ms": 0.17852308228611946,
+      "max_ms": 0.1982730464078486,
+      "samples": 400
+    }
+  },
+  "pipeline_reports": {
+    "periodic": [
+      {
+        "window_s": 2.0011979609844275,
+        "rates_hz": {
+          "policy": 25.014497490278497,
+          "rx_poll": 199.87963769549197,
+          "rx_joint_frames": 591.6241767653341,
+          "tx": 24.55888581065953,
+          "tx_new": 24.558912459997295,
+          "rx_complete": 24.607310636824646,
+          "camera": 29.768755240305367
+        },
+        "counts": {
+          "policy": 51,
+          "rx_poll": 400,
+          "rx_joint_frames": 1200,
+          "tx": 50,
+          "tx_new": 50,
+          "rx_complete": 50,
+          "camera": 60
+        },
+        "samples": {
+          "deadline_lateness_ms": {
+            "mean": 0.08474666780481736,
+            "max": 0.12210686691105366,
+            "p95": 0.11831690790131688,
+            "n": 51
+          },
+          "camera_age_ms": {
+            "mean": 16.745406182428056,
+            "max": 33.12282799743116,
+            "p95": 31.536872033029795,
+            "n": 51
+          },
+          "depth_ms": {
+            "mean": 0.6550508802391443,
+            "max": 1.9030949915759265,
+            "p95": 0.7642490090802312,
+            "n": 51
+          },
+          "feedback_age_ms": {
+            "mean": 35.21933443228002,
+            "max": 36.007002054248005,
+            "p95": 35.9880700125359,
+            "n": 51
+          },
+          "actor_ms": {
+            "mean": 0.12458862243768047,
+            "max": 0.1593580236658454,
+            "p95": 0.14743104111403227,
+            "n": 51
+          },
+          "cycle_ms": {
+            "mean": 1.0500400025835808,
+            "max": 2.339568978641182,
+            "p95": 1.1980980052612722,
+            "n": 51
+          },
+          "rx_backlog_bytes": {
+            "mean": 10.4,
+            "max": 48.0,
+            "p95": 48.0,
+            "n": 400
+          },
+          "rx_pending_bytes": {
+            "mean": 0.0,
+            "max": 0.0,
+            "p95": 0.0,
+            "n": 400
+          },
+          "rx_ms": {
+            "mean": 0.04673250747146085,
+            "max": 0.15093199908733368,
+            "p95": 0.11157203698530793,
+            "n": 400
+          },
+          "command_age_ms": {
+            "mean": 37.807958502089605,
+            "max": 38.864352041855454,
+            "p95": 38.79636694910005,
+            "n": 50
+          },
+          "tx_ms": {
+            "mean": 6.168128738645464,
+            "max": 6.507369980681688,
+            "p95": 6.309819000307471,
+            "n": 50
+          },
+          "tx_pending_bytes": {
+            "mean": 0.0,
+            "max": 0.0,
+            "p95": 0.0,
+            "n": 50
+          },
+          "observation_to_tx_ms": {
+            "mean": 38.96072902122741,
+            "max": 39.16906501399353,
+            "p95": 39.13614200428128,
+            "n": 49
+          }
+        },
+        "target_policy_hz": 25.0,
+        "tx_mode": "periodic",
+        "torch_threads": 1
+      },
+      {
+        "window_s": 1.0046846800250933,
+        "rates_hz": {
+          "rx_poll": 198.81880329856375,
+          "rx_joint_frames": 580.4723807814817,
+          "tx": 25.004218486836265,
+          "tx_new": 25.00425842500954,
+          "rx_complete": 24.097155126640647,
+          "camera": 29.583682777348297,
+          "policy": 24.876125033530798
+        },
+        "counts": {
+          "rx_poll": 200,
+          "rx_joint_frames": 600,
+          "tx": 26,
+          "tx_new": 26,
+          "rx_complete": 25,
+          "camera": 30,
+          "policy": 25
+        },
+        "samples": {
+          "rx_backlog_bytes": {
+            "mean": 10.32,
+            "max": 48.0,
+            "p95": 48.0,
+            "n": 200
+          },
+          "rx_pending_bytes": {
+            "mean": 0.0,
+            "max": 0.0,
+            "p95": 0.0,
+            "n": 200
+          },
+          "rx_ms": {
+            "mean": 0.04381227015983313,
+            "max": 0.1233600196428597,
+            "p95": 0.10685896268114448,
+            "n": 200
+          },
+          "command_age_ms": {
+            "mean": 38.61446334989383,
+            "max": 38.82406500633806,
+            "p95": 38.820703979581594,
+            "n": 26
+          },
+          "observation_to_tx_ms": {
+            "mean": 38.995599924909094,
+            "max": 39.1626349883154,
+            "p95": 39.1613959800452,
+            "n": 26
+          },
+          "tx_ms": {
+            "mean": 6.1557546141557395,
+            "max": 6.335180019959807,
+            "p95": 6.318615982308984,
+            "n": 26
+          },
+          "tx_pending_bytes": {
+            "mean": 0.0,
+            "max": 0.0,
+            "p95": 0.0,
+            "n": 26
+          },
+          "deadline_lateness_ms": {
+            "mean": 0.06914106663316488,
+            "max": 0.10647240560501814,
+            "p95": 0.10640441905707121,
+            "n": 25
+          },
+          "camera_age_ms": {
+            "mean": 17.312024428974837,
+            "max": 33.257110975682735,
+            "p95": 32.80558902770281,
+            "n": 25
+          },
+          "depth_ms": {
+            "mean": 0.6044099642895162,
+            "max": 0.7169779855757952,
+            "p95": 0.7046739920042455,
+            "n": 25
+          },
+          "feedback_age_ms": {
+            "mean": 35.82972136558965,
+            "max": 35.943664028309286,
+            "p95": 35.942839982453734,
+            "n": 25
+          },
+          "actor_ms": {
+            "mean": 0.12503088219091296,
+            "max": 0.19331800285726786,
+            "p95": 0.14818995259702206,
+            "n": 25
+          },
+          "cycle_ms": {
+            "mean": 0.992960159201175,
+            "max": 1.121559995226562,
+            "p95": 1.1142470175400376,
+            "n": 25
+          }
+        },
+        "target_policy_hz": 25.0,
+        "tx_mode": "periodic",
+        "torch_threads": 1
+      }
+    ],
+    "on_update": [
+      {
+        "window_s": 2.001207905006595,
+        "rates_hz": {
+          "policy": 25.014321899623265,
+          "rx_poll": 199.88598423477765,
+          "rx_joint_frames": 602.6642729445497,
+          "tx": 25.058736336975144,
+          "tx_new": 25.058766528814125,
+          "rx_complete": 25.11158419081175,
+          "camera": 29.771717278938723
+        },
+        "counts": {
+          "policy": 51,
+          "rx_poll": 400,
+          "rx_joint_frames": 1223,
+          "tx": 51,
+          "tx_new": 51,
+          "rx_complete": 51,
+          "camera": 60
+        },
+        "samples": {
+          "deadline_lateness_ms": {
+            "mean": 0.07643643766641617,
+            "max": 0.1299940631724894,
+            "p95": 0.12741005048155785,
+            "n": 51
+          },
+          "camera_age_ms": {
+            "mean": 17.006203257159203,
+            "max": 33.10220199637115,
+            "p95": 32.169724989216775,
+            "n": 51
+          },
+          "depth_ms": {
+            "mean": 0.6456973371278568,
+            "max": 1.9367100321687758,
+            "p95": 0.7572839967906475,
+            "n": 51
+          },
+          "feedback_age_ms": {
+            "mean": 35.02132842892452,
+            "max": 35.93024000292644,
+            "p95": 35.92857701005414,
+            "n": 51
+          },
+          "actor_ms": {
+            "mean": 0.12014084952134713,
+            "max": 0.1566199935041368,
+            "p95": 0.15112798428162932,
+            "n": 51
+          },
+          "cycle_ms": {
+            "mean": 1.0305949607772715,
+            "max": 2.33402696903795,
+            "p95": 1.1991770006716251,
+            "n": 51
+          },
+          "rx_backlog_bytes": {
+            "mean": 12.12,
+            "max": 48.0,
+            "p95": 48.0,
+            "n": 400
+          },
+          "rx_pending_bytes": {
+            "mean": 0.0,
+            "max": 0.0,
+            "p95": 0.0,
+            "n": 400
+          },
+          "rx_ms": {
+            "mean": 0.07084938915795647,
+            "max": 0.15060696750879288,
+            "p95": 0.12233597226440907,
+            "n": 400
+          },
+          "command_age_ms": {
+            "mean": 0.12720193869123855,
+            "max": 3.60019103391096,
+            "p95": 0.12180302292108536,
+            "n": 51
+          },
+          "tx_ms": {
+            "mean": 6.092246317112928,
+            "max": 6.225339020602405,
+            "p95": 6.158703006803989,
+            "n": 51
+          },
+          "tx_pending_bytes": {
+            "mean": 0.0,
+            "max": 0.0,
+            "p95": 0.0,
+            "n": 51
+          },
+          "observation_to_tx_ms": {
+            "mean": 0.4983740975148976,
+            "max": 3.9898219984024763,
+            "p95": 0.5118240369483829,
+            "n": 50
+          }
+        },
+        "target_policy_hz": 25.0,
+        "tx_mode": "on_update",
+        "torch_threads": 1
+      },
+      {
+        "window_s": 1.0000500709866174,
+        "rates_hz": {
+          "rx_poll": 199.75833778275296,
+          "rx_joint_frames": 587.2305588715088,
+          "tx": 24.147965256537926,
+          "tx_new": 24.14801057100401,
+          "rx_complete": 24.212665727109506,
+          "camera": 29.835698666691712,
+          "policy": 24.990831176010264
+        },
+        "counts": {
+          "rx_poll": 200,
+          "rx_joint_frames": 600,
+          "tx": 25,
+          "tx_new": 25,
+          "rx_complete": 25,
+          "camera": 30,
+          "policy": 25
+        },
+        "samples": {
+          "rx_backlog_bytes": {
+            "mean": 12.0,
+            "max": 48.0,
+            "p95": 48.0,
+            "n": 200
+          },
+          "rx_pending_bytes": {
+            "mean": 0.0,
+            "max": 0.0,
+            "p95": 0.0,
+            "n": 200
+          },
+          "rx_ms": {
+            "mean": 0.06924440880538896,
+            "max": 0.13435800792649388,
+            "p95": 0.11800497304648161,
+            "n": 200
+          },
+          "command_age_ms": {
+            "mean": 0.06403816631063819,
+            "max": 0.15905796317383647,
+            "p95": 0.10621902765706182,
+            "n": 25
+          },
+          "observation_to_tx_ms": {
+            "mean": 0.4396024835295975,
+            "max": 0.5618439754471183,
+            "p95": 0.519865017849952,
+            "n": 25
+          },
+          "tx_ms": {
+            "mean": 6.094073236454278,
+            "max": 6.222976022399962,
+            "p95": 6.207497965078801,
+            "n": 25
+          },
+          "tx_pending_bytes": {
+            "mean": 0.0,
+            "max": 0.0,
+            "p95": 0.0,
+            "n": 25
+          },
+          "deadline_lateness_ms": {
+            "mean": 0.083812375087291,
+            "max": 0.13804511399939656,
+            "p95": 0.12788840103894472,
+            "n": 25
+          },
+          "camera_age_ms": {
+            "mean": 16.62210639566183,
+            "max": 33.057997992727906,
+            "p95": 30.336996947880834,
+            "n": 25
+          },
+          "depth_ms": {
+            "mean": 0.6319754477590322,
+            "max": 0.7937719929032028,
+            "p95": 0.785831012763083,
+            "n": 25
+          },
+          "feedback_age_ms": {
+            "mean": 35.78909103991464,
+            "max": 35.97668500151485,
+            "p95": 35.95278598368168,
+            "n": 25
+          },
+          "actor_ms": {
+            "mean": 0.12103134766221046,
+            "max": 0.14921801630407572,
+            "p95": 0.14786096289753914,
+            "n": 25
+          },
+          "cycle_ms": {
+            "mean": 1.020653520245105,
+            "max": 1.2370689655654132,
+            "p95": 1.1951199849136174,
+            "n": 25
+          }
+        },
+        "target_policy_hz": 25.0,
+        "tx_mode": "on_update",
+        "torch_threads": 1
+      }
+    ]
+  },
+  "policy_checkpoint": "logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/2026-08-05_04-55-55_realcam_crop_noise_l2far_render12hz_from42000/model_68500.pt",
+  "estimator_checkpoint": "logs/rsl_rl/xy4leg_gripper_truss_v3_depth_crop_realcam/depth_crop_estimator_realcam_xmax060.pt",
+  "source_sha256": {
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/runtime_timing.py": "4e749addf45d9113b7f77936dca59a88f1aa394d748ded164a9d688b74ec6e76",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/radar_receiver.py": "7b2c3a82963ac6fd4805704a8d7fe40196080172620a702b7a6d879b68f19e5d",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/serial_threads.py": "3232af1f326744c6a3230851230697c19efe95e2f13f82190dea3fa53a029036",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/threads_shared.py": "1c2ddab97e2c9b33750a27bacdd0f60362a0dcfc6c61a25ff07f87d4bf83e95b",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/init_default_joint_pose.py": "347cfab0a7a8a03805796ece25bbf1cd67eb0ad067ce77f803fd24719e627089",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/play_real.py": "8e9759d9f90677ce6de47e74d872ab3350150c4cda44cd0e1595ac4bc59bd4fb",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/motor_session_gripper.py": "2b665119b9327725b20782c715d98a4f3cf50dff1312a82ad97b20cd93c3dfef",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/deployment_config.py": "15fbdaaecc3a0ea7f54ef5e923431b96b51c4c85fab6ab7f52514de85ac423ea",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/motor_control.py": "8f8e897e1522f10921e408dcf1978bc25c3d49f16489fc58499a54e8cfb2b9f9",
+    "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/open_all_grippers.py": "0896f678b447fa52eba7a6ddbac98892790f9e80848becc29b1effc516a8b676",
+    "source/isaaclab_tasks/test/test_xy4leg_truss_v3_sim2real.py": "3abec763e834cd273360ee615ffb5385f127c976749c77f995d29272fa087e9e"
+  },
+  "publication_note": "Measured source_sha256 values are preserved. Only the regression test harness subsequently gained a checked-in snapshot fallback so it can run in a clean checkout without ignored training logs; measured runtime Python sources are unchanged.",
+  "publication_test_sha256": "969e794d4c2849ea25f63dcf59e262cf9434d1aa843eb32f30d0d2ad57cd3d4b"
+}

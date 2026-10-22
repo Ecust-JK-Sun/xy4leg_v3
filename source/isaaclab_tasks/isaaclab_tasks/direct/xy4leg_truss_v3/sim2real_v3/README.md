@@ -1,9 +1,13 @@
-# Truss V3 Sim2Real Walk
+# Truss V3 Sim2Real Crossing
 
-这个目录用于 V3 learned-gripper walk 策略的第一版实机播放。它复用了 V2 的电机和雷达接口，
-但 `play_real.py` 已改为 V3/RSL-RL PPO 策略加载和 V3 walk observation 构造。
+这个目录用于 V3 learned-gripper 策略的实机播放，当前默认是 RealCam DepthBar crossing。
+2026-10-22 的部署参数恢复、反馈有效性和异常处理更新见 [修复记录](SIM2REAL_FIXES_2026-10-22.md)。
+本轮重点检查的通信、25 Hz 推理调度、延迟测量和启动参数见 [通信与频率检查](COMMUNICATION_TIMING_REVIEW_2026-10-22.md)。
+跨越模型及其完整训练时间见 [项目进展表](../PROGRESS_AND_SIM2REAL_REVIEW_2026-10-22.md)。
 
 默认不发送电机命令。只有显式传入 `--enable_motors` 时才会打开串口、使能电机并发送目标。
+带电 crossing 还要求 `--enable_camera --enable_radar`，并会加载模型配套 `params/`，不能只拷贝 `.pt`。
+本轮未新增安全停机动作。下文 Walk 训练与命令段落保留为历史资料，当前部署以修复记录为准。
 
 ## 文件说明
 
@@ -14,8 +18,9 @@ motor_control.py            DaMiao 串口协议
 motor_session_gripper.py    四路串口 + 24 维硬件命令封装
 serial_threads.py           电机反馈读取线程和动作发送线程
 threads_shared.py           线程共享最新 obs/action
+runtime_timing.py           绝对周期调度、异步相机缓存和 Hz/延迟统计
 radar_receiver.py           UDP 雷达/动捕数据接收
-play_real.py                V3 walk real-play 入口
+play_real.py                V3 crossing real-play 入口
 HANDOVER.md                 实机电脑需要实现/核对的 sim2real 接口说明
 CROSSING_SIM2REAL_PLAN.md   crossing sim2real 训练/部署路线
 ```
@@ -28,13 +33,13 @@ RSL-RL checkpoint。
 当前默认 checkpoint：
 
 ```text
-logs/rsl_rl/xy4leg_gripper_truss_v3_walk_sim2real/2026-07-24_18-58-21_deployable_interface/model_28800.pt
+logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/2026-08-05_04-55-55_realcam_crop_noise_l2far_render12hz_from42000/model_68500.pt
 ```
 
 对应任务：
 
 ```text
-Isaac-XY4Leg-Gripper-Truss-V3-Gripper-Walk-Sim2Real-Direct-v0
+Isaac-XY4Leg-Gripper-Truss-V3-Gripper-Student-DepthBar-Sim2Real-Direct-v0
 ```
 
 该策略是 24 维 action：
@@ -257,9 +262,16 @@ touchdown_impact / base_motion / slip 低于旧 walk
 
 ```text
 --gripper_binary_latch
---gripper_latch_deadband 0.10
+--gripper_latch_open_deadband 0.06
+--gripper_latch_close_deadband 0.10
 --gripper_latch_min_hold_s 0.8
 ```
+
+实机后腿夹爪如果出现“夹住后不张开”，优先检查打印中的
+`grip_raw/grip_latch/grip_cmd/grip_angle`。当前
+`gripper_calibration.yaml` 中对应腿的 `open_torque_scale/max_torque` 应以实机标定为准。
+如果 `grip_latch=+1` 但仍打不开，需要结合实际 `grip_cmd`、接线和机械状态检查，
+再决定是否调整标定。本轮部署修复没有修改夹爪标定文件。
 
 ## 雷达接口
 
@@ -337,19 +349,63 @@ python source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/p
 --startup_hold_s 5.0
 ```
 
+## DepthBar Crossing
+
+当前 `play_real.py` 也支持 depthbar sim2real crossing。默认任务和 checkpoint 已切换为：
+
+```text
+Isaac-XY4Leg-Gripper-Truss-V3-Gripper-Student-DepthBar-Sim2Real-Direct-v0
+logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/2026-08-05_04-55-55_realcam_crop_noise_l2far_render12hz_from42000/model_68500.pt
+```
+
+默认 depth estimator：
+
+```text
+logs/rsl_rl/xy4leg_gripper_truss_v3_depth_crop_realcam/depth_crop_estimator_realcam_xmax060.pt
+```
+
+先做不开电机的相机 dry run：
+
+```bash
+python source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/play_real.py \
+  --enable_camera \
+  --enable_radar \
+  --max_steps 300 \
+  --print_interval 25 \
+  --bar_estimate_lowpass_alpha 0.25 \
+  --headless
+```
+
+正常输出中应看到：
+
+```text
+bar_obs=[dx/dx_scale, dy/dy_scale, dz/dz_scale, visible]
+bar_m=[dx, dy, dz]
+bar_vis=raw_visible/memory_used
+```
+
+确认相机估计稳定后，再加 `--enable_motors`。如果相机安装不是倒置，启动时加
+`--no-camera_flip`。
+
+`play_real.py` 现在从模型配套的训练快照恢复 `dx_scale/dy_scale/dz_scale`。
+默认 `68500` 使用 `1.2 / 0.3 / 0.5`，不能直接使用后来训练分支的 `1.2 / 0.6 / 1.0`。
+低通 alpha 也优先恢复训练值；`68500` 为 `1.0`。如果实机需要额外去抖，显式传入
+`--bar_estimate_lowpass_alpha 0.30` 等覆盖值，并记录它对感知延迟的影响。
+
 ## Safety Checklist
 
-1. 先运行 dry run，确认 Walk-Sim2Real actor 输入是 80 维，action 是 24 维。
+1. 先运行 dry run，确认当前 DepthBar actor 输入是 80 维，action 是 24 维。
 2. 确认打印的 `Policy leg order` 和 `Hardware leg order` 符合当前接线。
 3. 确认 Joint5 的 sign 是否仍为负号映射。
-4. 先不接触地面或低负载测试 `--enable_motors --max_steps 200`。
+4. 带电 crossing 参数需要同时包含 `--enable_motors --enable_camera --enable_radar`。
 5. 确认夹爪开合方向；如果方向反，先改 gripper sign。
-6. 再加入雷达闭环，检查 projected gravity 在水平站立时接近 `[0, 0, -1]`。
+6. 检查雷达 projected gravity 在水平站立时接近 `[0, 0, -1]`；未收到有效雷达数据时带电入口不会继续启动。
 
 ## Known Limitations
 
-- 当前是 walk-only sim2real 验证，`bar_estimate` 使用 dummy value，还不是相机/depth crossing。
+- depthbar crossing 现在使用单前向 RealSense depth crop + estimator + nominal-velocity memory。
+  实机侧没有准确 body speed 时，memory 使用训练快照的 nominal velocity，`68500` 为 `0.035 m/s`。
 - 第一版没有做 IMU/雷达延迟补偿。
 - 第一版没有按实机电机温度/力矩做保护停机。
-- 电机串口设备名仍沿用 `/dev/ttyUSB0..3`，如果系统枚举变化需要先修
-  `motor_session_gripper.py`。
+- 电机串口默认仍沿用 `/dev/ttyUSB0..3`，可用 `--motor_ports` 按 LB LF RB RF 顺序指定
+  稳定设备路径；真实设备身份和接线仍需匹配。

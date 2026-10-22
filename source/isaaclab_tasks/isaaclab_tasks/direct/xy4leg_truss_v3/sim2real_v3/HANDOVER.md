@@ -1,5 +1,13 @@
 # Sim2Real V3 Handover
 
+2026-10-22 更新：当前 crossing 部署应优先参考 [修复记录](SIM2REAL_FIXES_2026-10-22.md)，
+模型与训练时间见 [进展表](../PROGRESS_AND_SIM2REAL_REVIEW_2026-10-22.md)。下文 Walk 交接信息保留为历史。
+部署时必须带模型配套 `params/`；带电 crossing 要同时启用相机和雷达，本轮没有增加安全停机动作。
+通信与频率的后续更新见 [检查记录](COMMUNICATION_TIMING_REVIEW_2026-10-22.md)：策略仍为 25 Hz，
+反馈改为非阻塞 200 Hz 轮询，相机独立采集；默认周期发送，可选 `--tx_mode on_update`。
+部署需带上新增 `runtime_timing.py`。用 `--timing_jsonl` 保存实际频率和队列/延迟统计，
+可用 `--motor_ports` 按 LB LF RB RF 指定四路稳定设备路径。
+
 本文档面向另一台实机部署电脑。当前仓库侧主要负责仿真训练；实机侧需要按这里的接口构造
 policy observation，并对夹爪 action 做低层后处理。
 
@@ -91,7 +99,7 @@ source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/damiao.y
 depth-derived bar estimate：
 
 ```text
-[bar_dx_b / 1.2, bar_dy_b / 0.3, bar_dz_b / 0.5, visible]
+[bar_dx_b / dx_scale, bar_dy_b / dy_scale, bar_dz_b / dz_scale, visible]
 ```
 
 当前不加入夹爪速度，因为实机夹爪速度反馈噪声较大。
@@ -178,10 +186,17 @@ only allow desired to change when previous command has been held >= 0.8 s
 
 ```text
 --gripper_binary_latch / --no-gripper_binary_latch
---gripper_latch_deadband 0.10
+--gripper_latch_open_deadband 0.06
+--gripper_latch_close_deadband 0.10
 --gripper_latch_min_hold_s 0.8
 --gripper_latch_initial_action -1.0
 ```
+
+`--gripper_latch_deadband` 仍保留兼容旧命令，但当前实机建议使用分离阈值。
+如果后腿夹爪夹住后不张开，先看 `grip_raw/grip_latch/grip_cmd/grip_angle`：
+`grip_latch=+1` 且 `grip_cmd` 有幅值但打不开，优先调
+`gripper_calibration.yaml` 里对应腿的 `open_torque_scale/max_torque`；
+如果 `grip_latch` 本身没有切到 `+1`，再降低 `--gripper_latch_open_deadband`。
 
 V3 仿真语义：
 
@@ -353,5 +368,52 @@ deadband 0.10 -> sign {-1, +1} -> min_hold 0.8 s -> torque_sign/scale
 5. longer walk run: 20 s，确认 base 晃动、足端冲击、夹爪时机
 ```
 
-当前阶段只验证 walk sim2real。camera/depth crossing sim2real 需要等
-`deployable + gripper position + depth bar_estimate` 的 crossing student 重新训练完成后再做。
+## DepthBar Crossing Update
+
+当前已经有第一版 depthbar sim2real crossing 实机入口。推荐候选模型：
+
+```text
+logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/2026-08-05_04-55-55_realcam_crop_noise_l2far_render12hz_from42000/model_68500.pt
+```
+
+同时必须拷贝 depth estimator：
+
+```text
+logs/rsl_rl/xy4leg_gripper_truss_v3_depth_crop_realcam/depth_crop_estimator_realcam_xmax060.pt
+```
+
+实机命令先不开电机：
+
+```bash
+python source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/play_real.py \
+  --task Isaac-XY4Leg-Gripper-Truss-V3-Gripper-Student-DepthBar-Sim2Real-Direct-v0 \
+  --checkpoint logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/2026-08-05_04-55-55_realcam_crop_noise_l2far_render12hz_from42000/model_68500.pt \
+  --depth_bar_estimator_checkpoint logs/rsl_rl/xy4leg_gripper_truss_v3_depth_crop_realcam/depth_crop_estimator_realcam_xmax060.pt \
+  --enable_camera \
+  --enable_radar \
+  --max_steps 300 \
+  --print_interval 25 \
+  --bar_estimate_lowpass_alpha 0.25 \
+  --headless
+```
+
+`play_real.py` 会从 RealSense 获取 64x64 depth crop，构造和训练一致的 2 通道 estimator 输入：
+
+```text
+channel 0: inverse normalized depth = 1 - depth_m / 1.5
+channel 1: valid mask
+```
+
+然后输出：
+
+```text
+bar_estimate = [bar_dx_b / dx_scale, bar_dy_b / dy_scale, bar_dz_b / dz_scale, visible]
+
+`play_real.py` 现在从模型配套的训练快照恢复 scale；默认 `68500` 使用
+`dx_scale=1.2, dy_scale=0.3, dz_scale=0.5`，不套用后来分支的归一化参数。
+```
+
+真实端没有 GT `raw_visible`，所以脚本用 estimator 输出是否落在真实相机 FOV 范围内近似判断；
+不可见后用 nominal forward velocity `0.035 m/s` 做 bar memory，默认保留 `1.6 s`。
+metric estimator 输出在进入 memory/policy 前可做一阶低通；参数
+`--bar_estimate_lowpass_alpha` 默认恢复模型训练值（`68500` 为 `1.0`），额外去抖需要显式传入覆盖值。
