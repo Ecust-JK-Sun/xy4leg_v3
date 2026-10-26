@@ -4,6 +4,9 @@
 2026-10-22 的部署参数恢复、反馈有效性和异常处理更新见 [修复记录](SIM2REAL_FIXES_2026-10-22.md)。
 本轮重点检查的通信、25 Hz 推理调度、延迟测量和启动参数见 [通信与频率检查](COMMUNICATION_TIMING_REVIEW_2026-10-22.md)。
 跨越模型及其完整训练时间见 [项目进展表](../PROGRESS_AND_SIM2REAL_REVIEW_2026-10-22.md)。
+逐文件的完整代码差异见 [代码改动报告](SIM2REAL_CODE_CHANGE_REPORT_2026-10-22.md)，
+可下载 [原始代码补丁](SIM2REAL_CODE_CHANGES_2026-10-22.patch)。两者对照 `e8a0a32 → a5bfcd0`，
+已于 2026-10-26 补入 GitHub 文档入口。
 
 默认不发送电机命令。只有显式传入 `--enable_motors` 时才会打开串口、使能电机并发送目标。
 带电 crossing 还要求 `--enable_camera --enable_radar`，并会加载模型配套 `params/`，不能只拷贝 `.pt`。
