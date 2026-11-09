@@ -34,3 +34,16 @@ logs/rsl_rl/**
 **/*.usda
 **/*.usdc
 **/*.usdz
+
+# Default RealCam deployment bundle (the params belong only to model_68500.pt).
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/model_68500.pt
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/depth_crop_estimator_realcam_xmax060.pt
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/params
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/params/env.yaml
+!logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/params/agent.yaml
+
+# Local measurements, generated previews, backups and trajectory data.
+logs/real_v3/
+backups/
+**/* copy.py
+**/simdata_replay/trajectories/

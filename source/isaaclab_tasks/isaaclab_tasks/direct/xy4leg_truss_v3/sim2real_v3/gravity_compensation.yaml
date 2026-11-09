@@ -1,0 +1,17 @@
+# Experimental fixed-base / suspended-leg self-weight model, not contact compensation.
+# Relative URDF paths are resolved against the IsaacLab repository root.
+urdf_path: Collect_data_pybullet/xy4legv5_gripper/urdf/xy4legv5_gripper.urdf
+motor_mass_kg: 0.5
+link_mass_kg: 0.05
+finger_mass_kg: 0.05
+# q_urdf = joint_signs * q_hardware + joint_offsets_deg (per leg).
+# Matches the existing V3 software convention; physical zero/axis agreement needs verification.
+joint_signs: [1, 1, 1, 1, -1]
+joint_offsets_deg:
+  LB: [0, 0, 0, 0, 0]
+  LF: [0, 0, 0, 0, 0]
+  RB: [0, 0, 0, 0, 0]
+  RF: [0, 0, 0, 0, 0]
+# These bound only the added feedforward, not the total MIT PD + feedforward torque.
+torque_limit_nm: [6.5, 3.5, 2, 1.5, 0.3]
+slew_rate_nm_s: [0.8, 0.4, 0.2, 0.15, 0.03]

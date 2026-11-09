@@ -1,0 +1,1671 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="xy4legv5_gripper">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-1.2415E-05 1.9429E-16 -0.039076"
+        rpy="0 0 0" />
+      <mass
+        value="2.8568" />
+      <inertia
+        ixx="0.0073316"
+        ixy="-1.3648E-08"
+        ixz="-1.682E-07"
+        iyy="0.013386"
+        iyz="3.3847E-08"
+        izz="0.017907" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.25098 0.25098 0.25098 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="RF_Link1">
+    <inertial>
+      <origin
+        xyz="-2.92287039474481E-07 -0.094308928083085 0.0125706982653553"
+        rpy="0 0 0" />
+      <mass
+        value="0.260903774749082" />
+      <inertia
+        ixx="0.000439099889141744"
+        ixy="-1.79373213751571E-08"
+        ixz="-2.27735467220739E-11"
+        iyy="0.000120751963193444"
+        iyz="3.78425073540003E-05"
+        izz="0.000456354908673847" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF_Joint1"
+    type="revolute">
+    <origin
+      xyz="0.165 -0.1188 -0.05"
+      rpy="1.5707963267949 0 3.14159265358979" />
+    <parent
+      link="base_link" />
+    <child
+      link="RF_Link1" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RF_Link2">
+    <inertial>
+      <origin
+        xyz="3.5646E-05 -0.07889 0.01368"
+        rpy="0 0 0" />
+      <mass
+        value="0.23244" />
+      <inertia
+        ixx="0.00031243"
+        ixy="3.1827E-08"
+        ixz="3.8373E-08"
+        iyy="0.00010362"
+        iyz="3.1215E-05"
+        izz="0.00033268" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF_Joint2"
+    type="revolute">
+    <origin
+      xyz="0 -0.12 0.0533000000000001"
+      rpy="3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="RF_Link1" />
+    <child
+      link="RF_Link2" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RF_Link3">
+    <inertial>
+      <origin
+        xyz="0.0011984 -0.09554 0.013128"
+        rpy="0 0 0" />
+      <mass
+        value="0.27444" />
+      <inertia
+        ixx="0.00022013"
+        ixy="-5.4274E-06"
+        ixz="-1.5726E-08"
+        iyy="0.00012489"
+        iyz="2.6812E-05"
+        izz="0.00021496" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF_Joint3"
+    type="revolute">
+    <origin
+      xyz="0 -0.1 0.0530000000000001"
+      rpy="-3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="RF_Link2" />
+    <child
+      link="RF_Link3" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RF_Link4">
+    <inertial>
+      <origin
+        xyz="-3.0051E-05 -0.073072 0.0086585"
+        rpy="0 0 0" />
+      <mass
+        value="0.17714" />
+      <inertia
+        ixx="0.00012472"
+        ixy="-1.3152E-10"
+        ixz="-7.9782E-09"
+        iyy="5.0066E-05"
+        iyz="-1.6004E-06"
+        izz="0.00014392" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF_Joint4"
+    type="revolute">
+    <origin
+      xyz="0.0347999999999999 -0.124 0.0185"
+      rpy="0 1.5707963267949 0" />
+    <parent
+      link="RF_Link3" />
+    <child
+      link="RF_Link4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RF_Link5">
+    <inertial>
+      <origin
+        xyz="4.0391E-05 -0.0031807 0.038247"
+        rpy="0 0 0" />
+      <mass
+        value="0.24148" />
+      <inertia
+        ixx="0.00010541"
+        ixy="-1.641E-08"
+        ixz="-1.2448E-07"
+        iyy="0.00014004"
+        iyz="-9.4968E-06"
+        izz="0.00014402" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_Link5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF_Joint5"
+    type="revolute">
+    <origin
+      xyz="0 -0.115 0.0284000000000001"
+      rpy="0 0 0" />
+    <parent
+      link="RF_Link4" />
+    <child
+      link="RF_Link5" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RF_1out_Link">
+    <inertial>
+      <origin
+        xyz="0.005637 -0.061213 -0.01855"
+        rpy="0 0 0" />
+      <mass
+        value="0.092666" />
+      <inertia
+        ixx="3.8932E-05"
+        ixy="8.5507E-08"
+        ixz="-4.593E-10"
+        iyy="3.227E-05"
+        iyz="2.8346E-10"
+        izz="2.2375E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_1out_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_1out_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF_1out_Joint"
+    type="revolute">
+    <origin
+      xyz="0.0194419668593422 -0.0354083541043056 0.0586606517741034"
+      rpy="0 -0.00311498007314502 0" />
+    <parent
+      link="RF_Link5" />
+    <child
+      link="RF_1out_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.523"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RF_2out_Link">
+    <inertial>
+      <origin
+        xyz="0.0037372 -0.061455 0.01855"
+        rpy="0 0 0" />
+      <mass
+        value="0.092666" />
+      <inertia
+        ixx="3.9039E-05"
+        ixy="2.7166E-07"
+        ixz="-4.5166E-10"
+        iyy="3.2162E-05"
+        iyz="2.9692E-10"
+        izz="2.2375E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_2out_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RF_2out_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RF_2out_Joint"
+    type="revolute">
+    <origin
+      xyz="-0.0195578439303442 -0.0354083541043057 0.0585391677477128"
+      rpy="-3.14159265355915 0.00311498007314657 3.14159265358979" />
+    <parent
+      link="RF_Link5" />
+    <child
+      link="RF_2out_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.523"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LF_Link1">
+    <inertial>
+      <origin
+        xyz="8.3528E-07 -0.094309 -0.012571"
+        rpy="0 0 0" />
+      <mass
+        value="0.2609" />
+      <inertia
+        ixx="0.0004391"
+        ixy="1.5363E-08"
+        ixz="-2.3076E-10"
+        iyy="0.00012075"
+        iyz="-3.7843E-05"
+        izz="0.00045635" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LF_Joint1"
+    type="revolute">
+    <origin
+      xyz="0.165 0.1188 -0.05"
+      rpy="1.5707963267949 0 3.14159265358979" />
+    <parent
+      link="base_link" />
+    <child
+      link="LF_Link1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LF_Link2">
+    <inertial>
+      <origin
+        xyz="3.4962E-05 -0.07889 -0.01368"
+        rpy="0 0 0" />
+      <mass
+        value="0.23244" />
+      <inertia
+        ixx="0.00031244"
+        ixy="-3.0882E-08"
+        ixz="-4.5212E-08"
+        iyy="0.00010362"
+        iyz="-3.1211E-05"
+        izz="0.00033268" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LF_Joint2"
+    type="revolute">
+    <origin
+      xyz="0 -0.12 -0.0532999999999999"
+      rpy="3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="LF_Link1" />
+    <child
+      link="LF_Link2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LF_Link3">
+    <inertial>
+      <origin
+        xyz="-0.0011984 -0.095559 -0.013145"
+        rpy="0 0 0" />
+      <mass
+        value="0.27444" />
+      <inertia
+        ixx="0.00022013"
+        ixy="5.4352E-06"
+        ixz="-9.0874E-09"
+        iyy="0.00012476"
+        iyz="-2.6813E-05"
+        izz="0.00021508" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LF_Joint3"
+    type="revolute">
+    <origin
+      xyz="0 -0.1 -0.053"
+      rpy="-3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="LF_Link2" />
+    <child
+      link="LF_Link3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LF_Link4">
+    <inertial>
+      <origin
+        xyz="-3.0131E-05 -0.073073 -0.0086585"
+        rpy="0 0 0" />
+      <mass
+        value="0.17714" />
+      <inertia
+        ixx="0.00012472"
+        ixy="1.3152E-10"
+        ixz="7.9755E-09"
+        iyy="5.0066E-05"
+        iyz="1.6005E-06"
+        izz="0.00014392" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LF_Joint4"
+    type="revolute">
+    <origin
+      xyz="-0.0347999999999999 -0.124 -0.0185"
+      rpy="0 1.5707963267949 0" />
+    <parent
+      link="LF_Link3" />
+    <child
+      link="LF_Link4" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LF_Link5">
+    <inertial>
+      <origin
+        xyz="-4.0391E-05 -0.0031807 -0.038247"
+        rpy="0 0 0" />
+      <mass
+        value="0.24148" />
+      <inertia
+        ixx="0.00010541"
+        ixy="1.641E-08"
+        ixz="-1.2448E-07"
+        iyy="0.00014004"
+        iyz="9.4968E-06"
+        izz="0.00014402" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_Link5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LF_Joint5"
+    type="revolute">
+    <origin
+      xyz="0 -0.115 -0.0284"
+      rpy="0 0 0" />
+    <parent
+      link="LF_Link4" />
+    <child
+      link="LF_Link5" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LF_1out_Link">
+    <inertial>
+      <origin
+        xyz="0.005637 -0.061213 -0.01855"
+        rpy="0 0 0" />
+      <mass
+        value="0.092666" />
+      <inertia
+        ixx="3.8932E-05"
+        ixy="8.5507E-08"
+        ixz="-4.593E-10"
+        iyy="3.227E-05"
+        iyz="2.8346E-10"
+        izz="2.2375E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_1out_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_1out_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LF_1out_Joint"
+    type="revolute">
+    <origin
+      xyz="-0.0194419668593422 -0.0354083541043055 -0.0586606517741034"
+      rpy="3.14159265355915 0.003114980073145 3.14159265358979" />
+    <parent
+      link="LF_Link5" />
+    <child
+      link="LF_1out_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.523"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LF_2out_Link">
+    <inertial>
+      <origin
+        xyz="0.0037372 -0.061455 0.01855"
+        rpy="0 0 0" />
+      <mass
+        value="0.092666" />
+      <inertia
+        ixx="3.9039E-05"
+        ixy="2.7166E-07"
+        ixz="-4.5166E-10"
+        iyy="3.2162E-05"
+        iyz="2.9691E-10"
+        izz="2.2375E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_2out_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LF_2out_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LF_2out_Joint"
+    type="revolute">
+    <origin
+      xyz="0.0195578439303442 -0.0354083541043057 -0.0585391677477128"
+      rpy="0 -0.00311498007314655 0" />
+    <parent
+      link="LF_Link5" />
+    <child
+      link="LF_2out_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.523"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RB_Link1">
+    <inertial>
+      <origin
+        xyz="5.3221E-06 -0.094309 0.012571"
+        rpy="0 0 0" />
+      <mass
+        value="0.2609" />
+      <inertia
+        ixx="0.00043909"
+        ixy="-4.3721E-08"
+        ixz="2.1277E-09"
+        iyy="0.00012076"
+        iyz="3.7842E-05"
+        izz="0.00045635" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RB_Joint1"
+    type="revolute">
+    <origin
+      xyz="-0.165 -0.1188 -0.05"
+      rpy="1.5707963267949 0 3.14159265358979" />
+    <parent
+      link="base_link" />
+    <child
+      link="RB_Link1" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RB_Link2">
+    <inertial>
+      <origin
+        xyz="3.4864E-05 -0.078898 0.01368"
+        rpy="0 0 0" />
+      <mass
+        value="0.23244" />
+      <inertia
+        ixx="0.00031245"
+        ixy="2.4836E-08"
+        ixz="3.7773E-08"
+        iyy="0.00010361"
+        iyz="3.1204E-05"
+        izz="0.00033268" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RB_Joint2"
+    type="revolute">
+    <origin
+      xyz="0 -0.120000000000001 0.0533000000000001"
+      rpy="3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="RB_Link1" />
+    <child
+      link="RB_Link2" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RB_Link3">
+    <inertial>
+      <origin
+        xyz="0.0011984 -0.095553 0.013137"
+        rpy="0 0 0" />
+      <mass
+        value="0.27444" />
+      <inertia
+        ixx="0.00022013"
+        ixy="-5.4327E-06"
+        ixz="-1.223E-08"
+        iyy="0.00012481"
+        iyz="2.6794E-05"
+        izz="0.00021503" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RB_Joint3"
+    type="revolute">
+    <origin
+      xyz="0 -0.0999999999999986 0.0530000000000002"
+      rpy="3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="RB_Link2" />
+    <child
+      link="RB_Link3" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RB_Link4">
+    <inertial>
+      <origin
+        xyz="-3.0051E-05 -0.073072 0.0086585"
+        rpy="0 0 0" />
+      <mass
+        value="0.17714" />
+      <inertia
+        ixx="0.00012472"
+        ixy="-1.3152E-10"
+        ixz="-7.9782E-09"
+        iyy="5.0066E-05"
+        iyz="-1.6004E-06"
+        izz="0.00014392" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RB_Joint4"
+    type="revolute">
+    <origin
+      xyz="0.0348000000000001 -0.124 0.0185"
+      rpy="0 1.5707963267949 0" />
+    <parent
+      link="RB_Link3" />
+    <child
+      link="RB_Link4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RB_Link5">
+    <inertial>
+      <origin
+        xyz="4.0391E-05 -0.0031807 0.038247"
+        rpy="0 0 0" />
+      <mass
+        value="0.24148" />
+      <inertia
+        ixx="0.00010541"
+        ixy="-1.641E-08"
+        ixz="-1.2448E-07"
+        iyy="0.00014004"
+        iyz="-9.4968E-06"
+        izz="0.00014402" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_Link5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RB_Joint5"
+    type="revolute">
+    <origin
+      xyz="0 -0.115 0.0283999999999999"
+      rpy="0 0 0" />
+    <parent
+      link="RB_Link4" />
+    <child
+      link="RB_Link5" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RB_1out_Link">
+    <inertial>
+      <origin
+        xyz="0.005637 -0.061213 -0.01855"
+        rpy="0 0 0" />
+      <mass
+        value="0.092666" />
+      <inertia
+        ixx="3.8932E-05"
+        ixy="8.5507E-08"
+        ixz="-4.593E-10"
+        iyy="3.227E-05"
+        iyz="2.8346E-10"
+        izz="2.2375E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_1out_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_1out_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RB_1out_Joint"
+    type="revolute">
+    <origin
+      xyz="0.0194419668593421 -0.0354083541043057 0.0586606517741034"
+      rpy="0 -0.00311498007314503 0" />
+    <parent
+      link="RB_Link5" />
+    <child
+      link="RB_1out_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.523"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="RB_2out_Link">
+    <inertial>
+      <origin
+        xyz="0.0037372 -0.061455 0.01855"
+        rpy="0 0 0" />
+      <mass
+        value="0.092666" />
+      <inertia
+        ixx="3.9039E-05"
+        ixy="2.7166E-07"
+        ixz="-4.5166E-10"
+        iyy="3.2162E-05"
+        iyz="2.9692E-10"
+        izz="2.2375E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_2out_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/RB_2out_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RB_2out_Joint"
+    type="revolute">
+    <origin
+      xyz="-0.0195578439303443 -0.0354083541043057 0.0585391677477128"
+      rpy="-3.14159265355915 0.00311498007314659 -3.14159265358979" />
+    <parent
+      link="RB_Link5" />
+    <child
+      link="RB_2out_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.523"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LB_Link1">
+    <inertial>
+      <origin
+        xyz="3.1897E-06 -0.094309 -0.012571"
+        rpy="0 0 0" />
+      <mass
+        value="0.2609" />
+      <inertia
+        ixx="0.0004391"
+        ixy="4.1049E-09"
+        ixz="-1.1326E-09"
+        iyy="0.00012075"
+        iyz="-3.7842E-05"
+        izz="0.00045635" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LB_Joint1"
+    type="revolute">
+    <origin
+      xyz="-0.165 0.1188 -0.05"
+      rpy="1.5707963267949 0 3.14159265358979" />
+    <parent
+      link="base_link" />
+    <child
+      link="LB_Link1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LB_Link2">
+    <inertial>
+      <origin
+        xyz="3.4962E-05 -0.07889 -0.01368"
+        rpy="0 0 0" />
+      <mass
+        value="0.23244" />
+      <inertia
+        ixx="0.00031244"
+        ixy="-3.0882E-08"
+        ixz="-4.5212E-08"
+        iyy="0.00010362"
+        iyz="-3.1211E-05"
+        izz="0.00033268" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LB_Joint2"
+    type="revolute">
+    <origin
+      xyz="0 -0.12 -0.0533000000000001"
+      rpy="3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="LB_Link1" />
+    <child
+      link="LB_Link2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LB_Link3">
+    <inertial>
+      <origin
+        xyz="-0.0011984 -0.09554 -0.013206"
+        rpy="0 0 0" />
+      <mass
+        value="0.27444" />
+      <inertia
+        ixx="0.00022013"
+        ixy="5.4274E-06"
+        ixz="1.5521E-08"
+        iyy="0.00012491"
+        iyz="-2.696E-05"
+        izz="0.00021493" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LB_Joint3"
+    type="revolute">
+    <origin
+      xyz="0 -0.0999999999999999 -0.053"
+      rpy="-3.14159265358979 0 3.14159265358979" />
+    <parent
+      link="LB_Link2" />
+    <child
+      link="LB_Link3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LB_Link4">
+    <inertial>
+      <origin
+        xyz="-3.0131E-05 -0.073073 -0.0086585"
+        rpy="0 0 0" />
+      <mass
+        value="0.17714" />
+      <inertia
+        ixx="0.00012472"
+        ixy="1.3152E-10"
+        ixz="7.9755E-09"
+        iyy="5.0066E-05"
+        iyz="1.6005E-06"
+        izz="0.00014392" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LB_Joint4"
+    type="revolute">
+    <origin
+      xyz="-0.0348 -0.124 -0.0185"
+      rpy="0 1.5707963267949 0" />
+    <parent
+      link="LB_Link3" />
+    <child
+      link="LB_Link4" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LB_Link5">
+    <inertial>
+      <origin
+        xyz="-4.0391E-05 -0.0031807 -0.038247"
+        rpy="0 0 0" />
+      <mass
+        value="0.24148" />
+      <inertia
+        ixx="0.00010541"
+        ixy="1.641E-08"
+        ixz="-1.2448E-07"
+        iyy="0.00014004"
+        iyz="9.4968E-06"
+        izz="0.00014402" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_Link5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LB_Joint5"
+    type="revolute">
+    <origin
+      xyz="0 -0.115 -0.0283999999999999"
+      rpy="0 0 0" />
+    <parent
+      link="LB_Link4" />
+    <child
+      link="LB_Link5" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LB_1out_Link">
+    <inertial>
+      <origin
+        xyz="0.005637 -0.061213 -0.01855"
+        rpy="0 0 0" />
+      <mass
+        value="0.092666" />
+      <inertia
+        ixx="3.8932E-05"
+        ixy="8.5507E-08"
+        ixz="-4.593E-10"
+        iyy="3.227E-05"
+        iyz="2.8345E-10"
+        izz="2.2375E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_1out_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_1out_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LB_1out_Joint"
+    type="revolute">
+    <origin
+      xyz="-0.0194419668593422 -0.0354083541043057 -0.0586606517741034"
+      rpy="3.14159265355915 0.00311498007314505 3.14159265358979" />
+    <parent
+      link="LB_Link5" />
+    <child
+      link="LB_1out_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.523"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+  <link
+    name="LB_2out_Link">
+    <inertial>
+      <origin
+        xyz="0.0037372 -0.061455 0.01855"
+        rpy="0 0 0" />
+      <mass
+        value="0.092666" />
+      <inertia
+        ixx="3.9039E-05"
+        ixy="2.7166E-07"
+        ixz="-4.5166E-10"
+        iyy="3.2162E-05"
+        iyz="2.9693E-10"
+        izz="2.2375E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_2out_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xy4legv5_gripper/meshes/LB_2out_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LB_2out_Joint"
+    type="revolute">
+    <origin
+      xyz="0.0195578439303442 -0.0354083541043057 -0.0585391677477128"
+      rpy="0 -0.0031149800731466 0" />
+    <parent
+      link="LB_Link5" />
+    <child
+      link="LB_2out_Link" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-0.523"
+      upper="0"
+      effort="0"
+      velocity="0" />
+  </joint>
+</robot>

@@ -80,11 +80,26 @@ class DaMiaoMotorController:
     def enable_motor(self, motor_id):
         """使能电机"""
         special_command = bytes.fromhex(f"{motor_id:02X} FF FF FF FF FF FF FF FF FC")
+        # Preserve replies consumed inside this call, including wrong IDs and
+        # disabled status=0. A caller's subsequent receive window cannot see them.
+        diagnostics = dict(port=self.port, motor_id=motor_id, request_hex=special_command.hex(),
+                           reply_count=0, observed_motor_ids=[], observed_status_codes=[],
+                           recent_reply_hex=[], buffered_partial_bytes=len(self._rx_buffer))
+        self.last_enable_diagnostics = diagnostics
         self.send(special_command)
         deadline = time.monotonic() + 0.2
         while time.monotonic() < deadline:
             response = self.receive()
             feedback = self.damiao_feedback(response) if response else None
+            diagnostics["buffered_partial_bytes"] = len(self._rx_buffer)
+            if response:
+                diagnostics["reply_count"] += 1
+                diagnostics["recent_reply_hex"] = (diagnostics["recent_reply_hex"] + [response.hex()])[-8:]
+            if feedback:
+                for key, value in (("observed_motor_ids", feedback["motor_id"]),
+                                   ("observed_status_codes", feedback["error_code"])):
+                    if value not in diagnostics[key]:
+                        diagnostics[key].append(value)
             if feedback and feedback["motor_id"] == motor_id and feedback["error_code"] != 0:
                 return feedback
         return None

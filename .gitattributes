@@ -1,0 +1,7 @@
+# Frozen geometry and calibration identities use SHA256 over the original bytes.
+# Keep the exported URDF's CRLF and spacing instead of normalizing its content.
+Collect_data_pybullet/xy4legv5_gripper/urdf/xy4legv5_gripper.urdf -text whitespace=-blank-at-eol
+source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/**/*.json -text
+*.pt binary
+# Existing driver sources contain CRLF; retain normal whitespace checks.
+*.py whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

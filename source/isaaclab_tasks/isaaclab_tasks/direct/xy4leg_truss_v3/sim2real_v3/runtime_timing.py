@@ -97,9 +97,12 @@ class TimingStats:
 class LatestCamera:
     """One capture owner; policy reads a timestamped latest frame without waiting on the SDK."""
 
-    def __init__(self, camera, img_size, max_age_s=.25, capture_hz=30., stats=None):
+    def __init__(self, camera, img_size, max_age_s=.25, capture_hz=30., stats=None, startup_timeout_s=5.):
+        if not math.isfinite(startup_timeout_s) or startup_timeout_s <= 0:
+            raise ValueError("Camera startup timeout must be positive and finite")
         self.camera, self.img_size, self.max_age_s = camera, img_size, max_age_s
         self.capture_hz, self.stats = capture_hz, stats
+        self.startup_timeout_s = startup_timeout_s
         self.depth_scale_m = camera.depth_scale_m
         self.lock = threading.Lock()
         self.stop_event = threading.Event()
@@ -116,9 +119,23 @@ class LatestCamera:
 
     def _capture(self):
         schedule = PeriodicDeadline(self.capture_hz)
+        startup_deadline = time.monotonic() + self.startup_timeout_s
         try:
             while schedule.wait(self.stop_event):
-                color, depth = self.camera.read(img_size=(self.img_size, self.img_size))
+                try:
+                    color, depth = self.camera.read(img_size=(self.img_size, self.img_size))
+                except TimeoutError as exc:
+                    # Before the first frame, allow device startup across several
+                    # bounded SDK waits. Never hide a timeout once streaming began.
+                    if self.sequence:
+                        raise
+                    if time.monotonic() >= startup_deadline:
+                        raise TimeoutError(
+                            f"Camera produced no first frame within {self.startup_timeout_s:g}s: {exc}"
+                        ) from exc
+                    if self.stats is not None:
+                        self.stats.tick("camera_startup_timeouts")
+                    continue
                 received_at = time.monotonic()
                 with self.lock:
                     self.sequence += 1

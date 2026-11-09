@@ -8,6 +8,43 @@ from pathlib import Path
 import yaml
 
 
+REPO_ROOT = Path(__file__).resolve().parents[6]
+DEFAULT_LOG_ROOT = str(REPO_ROOT / "logs" / "rsl_rl")
+BASELINE_MODEL_DIR = Path(DEFAULT_LOG_ROOT) / "xy4leg_gripper_truss_v3_student_depth_bar_sim2real"
+DEFAULT_CHECKPOINT = str(BASELINE_MODEL_DIR / "model_68500.pt")
+DEFAULT_DEPTH_BAR_ESTIMATOR = str(BASELINE_MODEL_DIR / "depth_crop_estimator_realcam_xmax060.pt")
+BASELINE_PARAMS_DIR = BASELINE_MODEL_DIR / "params"
+
+
+def resolve_training_config_dir(checkpoint: str, params_dir: str | None = None) -> Path:
+    """The local flattened baseline params belong exclusively to model_68500.pt."""
+    checkpoint_path = Path(checkpoint).resolve()
+    directory = Path(params_dir).resolve() if params_dir else checkpoint_path.parent / "params"
+    if directory == BASELINE_PARAMS_DIR.resolve() and checkpoint_path != Path(DEFAULT_CHECKPOINT).resolve():
+        raise ValueError(
+            f"{directory} belongs only to model_68500.pt, not {checkpoint_path.name}. "
+            "Use --training_config_dir to select this checkpoint's own training params/."
+        )
+    return directory
+
+
+def resolve_depth_bar_estimator_checkpoint(saved_path: str | None) -> str:
+    """Resolve saved log paths against the repo and relocate the known baseline estimator."""
+    if not saved_path:
+        return DEFAULT_DEPTH_BAR_ESTIMATOR
+    path = Path(saved_path)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    if path.is_file():
+        return str(path)
+    if path.name == Path(DEFAULT_DEPTH_BAR_ESTIMATOR).name:
+        return DEFAULT_DEPTH_BAR_ESTIMATOR
+    raise FileNotFoundError(
+        f"Depth-bar estimator is unavailable: {path}. "
+        "Use --depth_bar_estimator_checkpoint to specify its local path."
+    )
+
+
 class TrainingSnapshotLoader(yaml.SafeLoader):
     """Allow Isaac Lab's tuple/slice data tags without evaluating Python objects."""
 
@@ -65,7 +102,7 @@ def _update_object(config, values: dict) -> None:
 
 def restore_training_contract(env_cfg, agent_cfg, checkpoint: str, params_dir: str | None = None) -> dict:
     """Restore interface/model fields before constructing the helper environment or runner."""
-    directory = Path(params_dir) if params_dir else Path(checkpoint).resolve().parent / "params"
+    directory = resolve_training_config_dir(checkpoint, params_dir)
     saved_env = load_training_snapshot(directory / "env.yaml")
     saved_agent = load_training_snapshot(directory / "agent.yaml")
     required = ("gait_frequency", "deployable_observation_dim", "action_space",

@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "context": "Frozen offline candidates for explicit random-position comparison tests; not enabled in policy control",
+  "profiles": [
+    {
+      "leg": "LB",
+      "joint": 1,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lb_j1_directional_static_candidate_v1.json",
+      "sha256": "5aca239a4bbe0565f21273673236fc99f42c8ee88032d64d746d3cbb08fb0f3d",
+      "review_flags": []
+    },
+    {
+      "leg": "LB",
+      "joint": 2,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lb_j2_directional_static_candidate_v1.json",
+      "sha256": "5b51ca59b629f3eb1e608a463fbfe6c5685456e2fc79c8adfaef5148c6e4f5f0",
+      "review_flags": []
+    },
+    {
+      "leg": "LB",
+      "joint": 3,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lb_j3_directional_static_candidate_v1.json",
+      "sha256": "1dae0265dffaf1c7c3f258ca584db563be6745045c2f626b24e12d4ef741db2b",
+      "review_flags": []
+    },
+    {
+      "leg": "LB",
+      "joint": 4,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lb_j4_directional_static_candidate_v1.json",
+      "sha256": "d8be167865f2eb1ffe611c2f01f5444542b3cd5f0bd941f67bbbc04b2f5eefe7",
+      "review_flags": []
+    },
+    {
+      "leg": "LB",
+      "joint": 5,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lb_j5_directional_static_candidate_v1.json",
+      "sha256": "2bc0ac513d10212db58c2639ffdfc71a3bd8d96eda092ae92132fd9b7fe75668",
+      "review_flags": []
+    },
+    {
+      "leg": "LF",
+      "joint": 1,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lf_j1_directional_static_candidate_v1.json",
+      "sha256": "3cbafed07217a37d2c2067239876dfa4ec26ac7c0156e841f9e0f66c1ce758c3",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "LF",
+      "joint": 2,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lf_j2_directional_static_candidate_v1.json",
+      "sha256": "32854982ddd211937b195bb540de02a05216c5f3b7db74380181a1715027f826",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "LF",
+      "joint": 3,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lf_j3_directional_static_candidate_v1.json",
+      "sha256": "132d8286005ceca9b4c738e0b4b415e069f91605b900c2c5ce749963ed4dc6de",
+      "review_flags": [
+        "limited_three_round_validation",
+        "sparse_directional_support",
+        "directional_half_gap_changes_sign",
+        "directional_curves_not_better_than_angle_only_on_holdout"
+      ]
+    },
+    {
+      "leg": "LF",
+      "joint": 4,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lf_j4_directional_static_candidate_v1.json",
+      "sha256": "c7df28ba3b9d527793a2358cb82b4b33cd4f2b0ae19b927eaccc20a5573dca75",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "LF",
+      "joint": 5,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/lf_j5_directional_static_candidate_v1.json",
+      "sha256": "e5f852f479fb0891c5ae538c0d951340b229465c12dc8c316cab09bf60a09067",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "RB",
+      "joint": 1,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rb_j1_directional_static_candidate_v1.json",
+      "sha256": "aa650c1fd300ff54d0e5d168a3a203904c37d93570b5a5ed7a8680638f9b919c",
+      "review_flags": [
+        "limited_three_round_validation",
+        "settle_integral_saturation_in_source"
+      ]
+    },
+    {
+      "leg": "RB",
+      "joint": 2,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rb_j2_directional_static_candidate_v1.json",
+      "sha256": "4cb99e536f9d86412a81c101aa2fd935e66f22dc2406b436f8b7e7550130ca26",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "RB",
+      "joint": 3,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rb_j3_directional_static_candidate_v1.json",
+      "sha256": "2598447133463e9aafeef663c3942474ae33448d4da97b13c86c3d472a80dd4e",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "RB",
+      "joint": 4,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rb_j4_directional_static_candidate_v1.json",
+      "sha256": "70c16c5ef35d081707ee71edbfb25ecc11e9d539323e597083b047e02d29ec99",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "RB",
+      "joint": 5,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rb_j5_directional_static_candidate_v1.json",
+      "sha256": "2c4fa86318c341d0a681427f2c9948d7bafcf9c8419283fedb15faee0eb9aef7",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "RF",
+      "joint": 1,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rf_j1_directional_static_candidate_v1.json",
+      "sha256": "9fbc17650e3b34305284d3732291f24d2d66421f2931c1c29029bf7d144072ed",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "RF",
+      "joint": 2,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rf_j2_directional_static_candidate_v1.json",
+      "sha256": "dc49be859af8c1c54e5b10320ecbee6b5823eb59fdffdfbce93e6e01d6f19f13",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "RF",
+      "joint": 3,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rf_j3_directional_static_candidate_v1.json",
+      "sha256": "e9b101aa69ba08659437e05e229e51774ff6c9471668a91fe7b471464d1b4ce2",
+      "review_flags": [
+        "limited_three_round_validation",
+        "sparse_directional_support"
+      ]
+    },
+    {
+      "leg": "RF",
+      "joint": 4,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rf_j4_directional_static_candidate_v1.json",
+      "sha256": "459128bb450244c9ab28aaa86f318ce419bc251e27c9b87a53bdb470a2027c5c",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    },
+    {
+      "leg": "RF",
+      "joint": 5,
+      "path": "source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/sim2real_v3/calibration/directional/rf_j5_directional_static_candidate_v1.json",
+      "sha256": "689f3b5f83c4485a526f9027dc67561c253d6e4f345b7e197927841127fbe9f2",
+      "review_flags": [
+        "limited_three_round_validation"
+      ]
+    }
+  ]
+}

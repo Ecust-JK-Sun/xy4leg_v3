@@ -15,10 +15,12 @@ class SharedData:
         self.obs_sample_times = None
         self.obs_valid = None
         self.latest_action = None
+        self.latest_feedforward = None
         self.action_time = None
         self.action_sequence = 0
         self.action_observed_at = None
         self.error = None
+        self.error_details = None
 
     def set_obs(self, obs, sample_times=None, valid=None):
         with self.lock:
@@ -39,12 +41,18 @@ class SharedData:
                     raise RuntimeError("Invalid motor observation; expected 48 finite values")
             return None if self.latest_obs is None else self.latest_obs.copy()
 
-    def set_action(self, act, observed_at=None):
+    def set_action(self, act, observed_at=None, feedforward=None):
         action = np.asarray(act, dtype=np.float32)
         if action.shape != (24,) or not np.isfinite(action).all():
             raise ValueError("Hardware action must contain exactly 24 finite values")
+        if feedforward is not None:
+            feedforward = np.asarray(feedforward, dtype=np.float32)
+            if (feedforward.shape != (20,) or not np.isfinite(feedforward).all()
+                    or np.any(np.abs(feedforward) > 28)):
+                raise ValueError("Feedforward must contain 20 finite torques in [-28,28]")
         with self.lock:
             self.latest_action = action.copy()
+            self.latest_feedforward = None if feedforward is None else feedforward.copy()
             self.action_time = time.monotonic()
             self.action_observed_at = observed_at
             self.action_sequence += 1
@@ -54,12 +62,18 @@ class SharedData:
         return self.action_snapshot(max_age_s=max_age_s, now=now)[0]
 
     def action_snapshot(self, max_age_s=None, now=None):
+        action, _, stamp, sequence, observed = self.command_snapshot(max_age_s=max_age_s, now=now)
+        return action, stamp, sequence, observed
+
+    def command_snapshot(self, max_age_s=None, now=None):
+        """Position/gripper targets and Joint1-5 feedforward from the same publication."""
         with self.lock:
             if self.latest_action is not None and max_age_s is not None:
                 age = (time.monotonic() if now is None else now) - self.action_time
                 if age < 0 or age > max_age_s:
                     raise RuntimeError(f"Policy command expired ({age:.3f}s old)")
             return (None if self.latest_action is None else self.latest_action.copy(),
+                    None if self.latest_feedforward is None else self.latest_feedforward.copy(),
                     self.action_time, self.action_sequence, self.action_observed_at)
 
     def wait_for_action(self, previous_sequence, timeout):
@@ -74,11 +88,16 @@ class SharedData:
                 return float("nan")
             return (time.monotonic() if now is None else now) - float(np.min(self.obs_sample_times))
 
-    def set_error(self, source, error):
+    def set_error(self, source, error, details=None):
         with self.lock:
             if self.error is None:
                 self.error = f"{source}: {error}"
+                self.error_details = details
             self.action_changed.notify_all()
+
+    def failure_snapshot(self):
+        with self.lock:
+            return {"error": self.error, "feedback": self.error_details}
 
     def raise_if_failed(self):
         with self.lock:

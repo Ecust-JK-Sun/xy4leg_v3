@@ -1,25 +1,18 @@
-# Checkpoints and Current Crossing References
+# Included Checkpoints
 
-Only a small set of useful checkpoints is included. Full training logs,
-videos, datasets, and intermediate checkpoints are intentionally excluded.
+完整训练和实机结论见 [项目总结](source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/README.md)。本文件仅维护仓库内模型清单；完整训练日志、数据集和中间 checkpoint 不纳入版本控制。
 
-## Current crossing references（2026-10-22 审查，2026-10-26 整理）
+## 2026-11-09 默认部署模型
 
-当前模型选择只比较 crossing。下表是审查中建议保留或复评的模型引用；
-训练开始时间取 run 目录名，均为北京时间，不代表 checkpoint 的精确保存时间，
-也不包含前序训练耗时。完整路径、指标口径及限制见
-[项目进展表](source/isaaclab_tasks/isaaclab_tasks/direct/xy4leg_truss_v3/PROGRESS_AND_SIM2REAL_REVIEW_2026-10-22.md)。
+目录：`logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/`。
+策略为 RealCam DepthBar `68500`，80D actor、24D action、25 Hz；模型和 params 必须配套使用，旧 heightmap estimator 或测试 fixture 均不能替代。
 
-| 方向 | 训练 run 开始时间（北京时间） | 模型 | 用途 |
-| --- | --- | --- | --- |
-| 历史 heightmap DepthBar | 2026-07-22 15:49:26 | `model_30000.pt` | 前后相机 heightmap 历史基线，接口与当前 RealCam 模型不同 |
-| 当前默认 RealCam DepthBar | 2026-08-05 04:55:55 | `model_68500.pt` | 当前部署基线，80D actor、24D action、25 Hz 策略周期 |
-| Noisy OracleBar PPO | 2026-08-28 03:08:45 | `model_27000.pt` / `model_27600.pt` | 带噪横杆真值输入的仿真控制器参考 |
-| 低频安全 Teacher | 2026-09-08 02:11:53 | `model_96000.pt` / `model_96800.pt` | 92D 特权 actor 候选，仍需复评和蒸馏 |
-
-本次更新仅发布修复代码、测试和文档，没有新增上述 checkpoint 权重。
-部署 `68500` 还需要模型配套的完整 `params/` 和 RealCam 深度 estimator；
-不能使用下列旧 heightmap estimator 替代，也不能使用测试 fixture 替代真实训练参数。
+| 文件 | bytes | SHA256 |
+| --- | ---: | --- |
+| [model_68500.pt](logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/model_68500.pt) | 3383661 | `6a2406a3a6770dd90a326fc15aac5b50ff1a6bb56c6fa2cf81b50b02c10acfc6` |
+| [depth_crop_estimator_realcam_xmax060.pt](logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/depth_crop_estimator_realcam_xmax060.pt) | 289926 | `3d8580f29511139418373fae63e5911edd29de70add9f63af1f063c9a282aadb` |
+| [params/env.yaml](logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/params/env.yaml) | 22416 | `c4c42dc87d0fa865d34f6d686f951324175f1684172930e3149ca10f0553b0a4` |
+| [params/agent.yaml](logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/params/agent.yaml) | 1251 | `efd9f47b7285bae0c94f8e6d5fca25b656332794a85e3279afb70f13989eeaa2` |
 
 ## Historical checkpoints included in this repository
 

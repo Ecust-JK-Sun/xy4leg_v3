@@ -9,7 +9,9 @@ sensors. For DepthBar crossing policies, pass ``--enable_camera`` and a
 depth-bar estimator checkpoint to fill the 4D bar_estimate channel from a
 RealSense depth crop.
 
-It defaults to dry-run mode. Pass ``--enable_motors`` to send commands.
+It defaults to dry-run mode with radar disabled for every task. Pass
+``--enable_motors`` to send commands. Without radar, body observations use
+level gravity, zero angular velocity and the configured fallback forward speed.
 """
 
 from __future__ import annotations
@@ -38,18 +40,14 @@ if str(CAMERA_DIR) not in sys.path:
 from isaaclab.app import AppLauncher
 
 import cli_args_v3 as cli_args  # isort: skip
+from deployment_config import (  # isort: skip
+    DEFAULT_CHECKPOINT,
+    DEFAULT_LOG_ROOT,
+    resolve_depth_bar_estimator_checkpoint,
+)
 
 
 DEFAULT_TASK = "Isaac-XY4Leg-Gripper-Truss-V3-Gripper-Student-DepthBar-Sim2Real-Direct-v0"
-DEFAULT_CHECKPOINT = (
-    "logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/"
-    "2026-08-05_04-55-55_realcam_crop_noise_l2far_render12hz_from42000/model_68500.pt"
-)
-DEFAULT_DEPTH_BAR_ESTIMATOR = (
-    "logs/rsl_rl/xy4leg_gripper_truss_v3_depth_crop_realcam/"
-    "depth_crop_estimator_realcam_xmax060.pt"
-)
-DEFAULT_LOG_ROOT = str(Path(__file__).resolve().parents[6] / "logs" / "rsl_rl")
 
 
 parser = argparse.ArgumentParser(description="Run a V3 learned-gripper policy on hardware.")
@@ -63,17 +61,19 @@ parser.add_argument(
 parser.add_argument("--num_envs", type=int, default=1, help="Must remain 1 for hardware play.")
 parser.add_argument("--seed", type=int, default=None, help="Environment seed.")
 parser.add_argument("--loop_hz", type=float, default=None, help="Must match the checkpoint's training frequency.")
-parser.add_argument("--feedback_poll_hz", type=float, default=200.0, help="Nonblocking feedback polling rate; independent of policy Hz.")
+parser.add_argument("--feedback_poll_hz", type=float, default=200.0,
+                    help="Host nonblocking receive polling rate only; does not configure motor feedback generation.")
 parser.add_argument("--torch_threads", type=int, default=1, help="CPU Torch threads for batch-one inference.")
 parser.add_argument("--timing_interval_s", type=float, default=2.0, help="Print measured rates and latency at this interval.")
 parser.add_argument("--timing_jsonl", type=str, default=None, help="Append timing reports to a JSONL file.")
-parser.add_argument("--tx_mode", choices=("periodic", "on_update"), default="periodic",
+parser.add_argument("--tx_mode", choices=("periodic", "on_update"), default="on_update",
                     help="Periodic resend, or one send per policy update without heartbeat resends.")
-parser.add_argument("--training_config_dir", type=str, default=None, help="Saved params/ directory; inferred from checkpoint.")
+parser.add_argument("--training_config_dir", type=str, default=None,
+                    help="Checkpoint's own params/ directory. Local baseline params/ belongs only to model_68500.pt.")
 parser.add_argument("--feedback_timeout_s", type=float, default=0.5, help="Maximum per-motor feedback age.")
 parser.add_argument("--radar_timeout_s", type=float, default=0.5, help="Maximum radar receipt age.")
 parser.add_argument("--command_timeout_s", type=float, default=0.5, help="Report expired policy commands; no shutdown action is sent.")
-parser.add_argument("--sensor_ready_timeout_s", type=float, default=5.0, help="Wait for valid initial sensor feedback.")
+parser.add_argument("--sensor_ready_timeout_s", type=float, default=6.0, help="Wait for valid initial sensor feedback.")
 parser.add_argument("--max_steps", type=int, default=0, help="Stop after N steps; 0 means run until interrupted.")
 parser.add_argument("--print_interval", type=int, default=25, help="Print diagnostics every N control steps.")
 parser.add_argument("--enable_motors", action="store_true", help="Actually enable motors and transmit commands.")
@@ -88,6 +88,21 @@ parser.add_argument(
     help="Treat radar linear/angular velocities as world-frame and rotate them into body frame.",
 )
 parser.add_argument("--startup_hold_s", type=float, default=3.0, help="Hold initial command before policy loop.")
+parser.add_argument("--startup_ramp_s", type=float, default=3.0,
+                    help="Smoothly interpolate all legs to the initial pose with zero endpoint speed/acceleration.")
+parser.add_argument("--enable_gravity_compensation", action="store_true",
+                    help="Legacy enable flag; model feedforward is now enabled by default.")
+parser.add_argument("--compensation", choices=("none", "nominal", "fitted", "fitted_j1"), default="fitted_j1",
+                    help="Leg feedforward model; default fitted masses plus J1 residual, without integral learning.")
+parser.add_argument("--gravity_config", type=str, default=str(THIS_DIR / "gravity_compensation.yaml"))
+parser.add_argument("--gravity_urdf", type=str, default=None, help="Override gravity model URDF path.")
+parser.add_argument("--gravity_scale", type=float, default=1.0, help="Multiplier in [0,1] before feedforward limiting.")
+parser.add_argument("--gravity_node_mass_file", type=str, default=None,
+                    help="Override the default fitted six-node mass file.")
+parser.add_argument("--j1_residual_file", type=str, default=None,
+                    help="Override the J1 residual file; fitted_j1 automatically loads the default file.")
+parser.add_argument("--j1_residual_scale", type=float, default=1.)
+parser.add_argument("--j1_residual_limit_nm", type=float, default=1.5)
 parser.add_argument(
     "--gripper_calibration",
     type=str,
@@ -700,6 +715,19 @@ def _read_motor_cfg(path: str) -> tuple[list[float], list[float]]:
     return list(kp_list), list(kd_list)
 
 
+def _gravity_feedforward(controller, joint_pos, gripper_angle, projected_gravity, now=None):
+    """Use measured policy-order joints; publish torques in hardware joint-major order."""
+    hardware_pos = np.empty(20, dtype=float)
+    hardware_fingers = np.empty(4, dtype=float)
+    for hardware_leg, leg in enumerate(HARDWARE_LEGS):
+        hardware_fingers[hardware_leg] = gripper_angle[POLICY_LEGS.index(leg)]
+        for joint in range(5):
+            hi = _hw_index(leg, joint)
+            hardware_pos[hi] = joint_pos[_policy_index(leg, joint)] * SIM_TO_REAL_SIGN[hi]
+    return controller.update(hardware_pos, np.asarray(projected_gravity) * 9.81,
+                             hardware_fingers, now=now)
+
+
 def _build_policy_observation(
     joint_pos: np.ndarray,
     joint_vel: np.ndarray,
@@ -836,7 +864,7 @@ def _resolve_runtime_defaults(args, cfg):
         if not math.isfinite(value) or not 0 <= value <= 1:
             raise ValueError(f"--{key} must be finite and in [0,1]")
     for key in ("feedback_timeout_s", "radar_timeout_s", "command_timeout_s", "sensor_ready_timeout_s",
-                "feedback_poll_hz", "camera_stale_timeout_s", "timing_interval_s"):
+                "feedback_poll_hz", "camera_stale_timeout_s", "timing_interval_s", "startup_ramp_s"):
         value = float(getattr(args, key))
         if not math.isfinite(value) or value <= 0:
             raise ValueError(f"--{key} must be positive and finite")
@@ -849,6 +877,19 @@ def _resolve_runtime_defaults(args, cfg):
         raise ValueError("Invalid camera size, timeout or depth range")
     if args.torch_threads < 1:
         raise ValueError("--torch_threads must be positive")
+    if not math.isfinite(args.gravity_scale) or not 0 <= args.gravity_scale <= 1:
+        raise ValueError("--gravity_scale must be finite and in [0,1]")
+    if args.compensation not in ("none", "nominal", "fitted", "fitted_j1"):
+        raise ValueError("Unsupported --compensation mode")
+    if args.compensation == "none" and args.enable_gravity_compensation:
+        raise ValueError("--compensation none conflicts with --enable_gravity_compensation")
+    if (args.gravity_node_mass_file or args.j1_residual_file) and args.compensation not in ("fitted", "fitted_j1"):
+        raise ValueError("Fitted masses/J1 residual require --compensation fitted or fitted_j1")
+    args.enable_gravity_compensation = args.compensation != "none"
+    if not math.isfinite(getattr(args, "j1_residual_scale", 1.)) or not 0 <= getattr(args, "j1_residual_scale", 1.) <= 1:
+        raise ValueError("--j1_residual_scale must be in [0,1]")
+    if not math.isfinite(getattr(args, "j1_residual_limit_nm", 1.5)) or not 0 < getattr(args, "j1_residual_limit_nm", 1.5) <= 28:
+        raise ValueError("--j1_residual_limit_nm must be in (0,28]")
 
 
 def _report_timing(stats, args):
@@ -882,6 +923,54 @@ def _report_timing(stats, args):
     return report
 
 
+def _startup_current_command(session):
+    """Bootstrap from verified enable feedback; grippers receive zero torque."""
+    obs, timestamps, valid = session.feedback_snapshot()
+    if (obs.shape != (48,) or timestamps.shape != (24,) or valid.shape != (24,)
+            or not valid.all() or not np.isfinite(obs).all() or not np.isfinite(timestamps).all()):
+        raise RuntimeError("Startup ramp requires valid enable feedback for all 24 motors")
+    command = np.zeros(24, dtype=np.float32)
+    command[:20] = obs[:20]
+    return command
+
+
+def _startup_interpolated_positions(start, target, elapsed_s, duration_s):
+    """Quintic interpolation with zero velocity and acceleration at both ends."""
+    progress = float(np.clip(elapsed_s / duration_s, 0., 1.))
+    alpha = progress ** 3 * (10. + progress * (-15. + 6. * progress))
+    if progress >= 1.:
+        return np.asarray(target).copy()
+    return start + alpha * (target - start)
+
+
+def _report_motor_feedback(session, shared, args, error):
+    report = shared.failure_snapshot()
+    captured_at_failure = report["feedback"] is not None
+    if not captured_at_failure:
+        report["feedback"] = session.feedback_diagnostics(max_age_s=args.feedback_timeout_s)
+    report.update(error=report["error"] or str(error), captured_at_failure=captured_at_failure)
+    feedback = report["feedback"]
+    print(f"[MOTOR_FEEDBACK] {report['error']}; RX frames={feedback['rx_frames']}, "
+          f"invalid IDs={feedback['rx_invalid_frames']}, captured_at_failure={captured_at_failure}")
+    for port in feedback["ports"]:
+        print(f"[MOTOR_RX] {port['leg']} port={port['port']} "
+              f"backlog={port['backlog_bytes']}B pending={port['pending_bytes']}B "
+              f"last_frames={port['last_frames_hex']}")
+    for motor in feedback["motors"]:
+        age = "never" if motor["age_ms"] is None else f"{motor['age_ms']:.1f}ms"
+        print(f"[MOTOR_FEEDBACK] index={motor['index']} {motor['leg']}.J{motor['joint']} "
+              f"id={motor['motor_id']} status={motor['status']} valid={motor['valid']} "
+              f"age={age} valid_count={motor['valid_feedback_count']} "
+              f"problem={','.join(motor['problems']) or 'none'}")
+    if args.timing_jsonl:
+        destination = Path(str(args.timing_jsonl) + ".motors.jsonl")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with destination.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(report, allow_nan=False) + "\n")
+        print(f"[MOTOR_FEEDBACK] Saved diagnostics: {destination}")
+    return report
+
+
 def _wait_until_ready(check, timeout_s, cancelled):
     deadline = time.monotonic() + timeout_s
     while not cancelled():
@@ -898,8 +987,6 @@ def _wait_until_ready(check, timeout_s, cancelled):
 def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: RslRlBaseRunnerCfg):
     if args_cli.num_envs != 1:
         raise ValueError("sim2real_v3/play_real.py only supports --num_envs 1")
-    if args_cli.enable_motors and not args_cli.enable_radar:
-        raise ValueError("--enable_motors requires --enable_radar for body orientation/angular velocity")
 
     stop_requested = False
 
@@ -923,8 +1010,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     _resolve_runtime_defaults(args_cli, env_cfg)
     torch.set_num_threads(args_cli.torch_threads)
     if args_cli.depth_bar_estimator_checkpoint is None:
-        args_cli.depth_bar_estimator_checkpoint = (
-            contract["env"].get("depth_bar_estimator_checkpoint") or DEFAULT_DEPTH_BAR_ESTIMATOR
+        args_cli.depth_bar_estimator_checkpoint = resolve_depth_bar_estimator_checkpoint(
+            contract["env"].get("depth_bar_estimator_checkpoint")
         )
     print(f"[INFO] Training interface restored from: {contract['params_dir']}")
     print(f"[INFO] Training gait/control: {env_cfg.gait_frequency:g} Hz / {args_cli.loop_hz:g} Hz")
@@ -963,6 +1050,9 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     print(f"[INFO] Checkpoint: {resume_path}")
     print(f"[INFO] Motors enabled: {args_cli.enable_motors}")
     print(f"[INFO] Radar enabled: {args_cli.enable_radar}")
+    if not args_cli.enable_radar:
+        print(f"[INFO] Body observation fallback: gravity=[0, 0, -1], angular velocity=[0, 0, 0], "
+              f"forward speed={args_cli.default_forward_speed:g} m/s")
     obs_groups_cfg = getattr(agent_cfg, "obs_groups", {})
     if "actor" in obs_groups_cfg:
         actor_obs_groups = list(obs_groups_cfg["actor"])
@@ -1077,9 +1167,25 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     receiver = None
     camera = None
     depth_bar_runtime = None
+    gravity_controller = None
+    gravity_ff = None
     step = 0
 
     try:
+        if args_cli.enable_gravity_compensation:
+            from gravity_compensation import GravityFeedforward
+            from initialization_models import make_compensation_model
+
+            gravity_model = make_compensation_model(
+                args_cli.compensation, args_cli.gravity_config, args_cli.gravity_urdf,
+                args_cli.gravity_node_mass_file, args_cli.j1_residual_file,
+                args_cli.j1_residual_scale, args_cli.j1_residual_limit_nm)
+            gravity_controller = GravityFeedforward(gravity_model, args_cli.gravity_scale, 1. / args_cli.loop_hz)
+            gravity_ff = np.zeros(20)
+            print("[INFO] Gravity feedforward model:", json.dumps(gravity_model.description(), ensure_ascii=False))
+            print(f"[INFO] Gravity scale={args_cli.gravity_scale:g}; "
+                  f"gravity source={'radar orientation' if args_cli.enable_radar else 'assumed level base'}; "
+                  f"joint source={'motor feedback' if args_cli.enable_motors else 'synthetic default pose (dry run)'}")
         if args_cli.enable_radar:
             receiver = RadarReceiver(port=args_cli.radar_port, source_ip=args_cli.radar_source_ip, stats=timing)
             receiver.start()
@@ -1093,6 +1199,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 RealSenseCamera(device_id=args_cli.camera_device_id, flip=args_cli.camera_flip,
                                 timeout_ms=args_cli.camera_timeout_ms),
                 args_cli.camera_img_size, max_age_s=args_cli.camera_stale_timeout_s, stats=timing,
+                startup_timeout_s=args_cli.sensor_ready_timeout_s,
             ).start()
             depth_bar_runtime = _load_depth_bar_runtime(
                 args_cli.depth_bar_estimator_checkpoint,
@@ -1126,7 +1233,8 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
             )
             motor_session.enable_all(cancelled=lambda: stop_requested)
             # Enabling is the only serial reader until all acknowledgements arrive.
-            shared.set_action(hold_command)
+            startup_command = _startup_current_command(motor_session)
+            shared.set_action(startup_command, feedforward=gravity_ff)
             tx_thread = start_serial_tx_thread(
                 shared,
                 True,
@@ -1143,22 +1251,43 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 shared, motor_session, device, 1, loop_hz=args_cli.feedback_poll_hz,
                 stop_event=io_stop_event, stats=timing,
             )
-            print(f"[INFO] Holding nominal command for {args_cli.startup_hold_s:.1f}s")
-            hold_until = time.monotonic() + args_cli.startup_hold_s
+            ramp_start_positions = startup_command[:20].copy()
+            ramp_started = None
+            hold_until = None
             ready_until = time.monotonic() + max(args_cli.startup_hold_s, args_cli.sensor_ready_timeout_s)
+            print(f"[INFO] Smoothly ramping all legs from measured positions for {args_cli.startup_ramp_s:g}s, "
+                  f"then holding nominal command for {args_cli.startup_hold_s:g}s")
             while not stop_requested:
                 shared.raise_if_failed()
-                receiver.get_data(max_age_s=args_cli.radar_timeout_s)
-                shared.set_action(hold_command)
+                if receiver is not None:
+                    receiver.get_data(max_age_s=args_cli.radar_timeout_s)
                 try:
-                    shared.get_obs(max_age_s=args_cli.feedback_timeout_s)
+                    startup_obs = shared.get_obs(max_age_s=args_cli.feedback_timeout_s)
                     feedback_ready = True
                     feedback_ready_event.set()
                 except RuntimeError as exc:
                     feedback_ready = False
                     if feedback_ready_event.is_set() or time.monotonic() >= ready_until:
                         raise RuntimeError(f"Motor feedback startup timed out: {exc}") from exc
-                if feedback_ready and time.monotonic() >= hold_until:
+                if feedback_ready and gravity_controller is not None:
+                    startup_pos, _, startup_gripper = _hardware_obs_to_policy_joints(startup_obs, gripper_calibration)
+                    startup_gravity, _, _ = _radar_observation(
+                        receiver, args_cli.default_forward_speed, args_cli.radar_velocity_world,
+                        max_age_s=args_cli.radar_timeout_s)
+                    gravity_ff = _gravity_feedforward(
+                        gravity_controller, startup_pos, startup_gripper, startup_gravity)
+                if feedback_ready:
+                    now = time.monotonic()
+                    if ramp_started is None:
+                        # Keep the already-published target as the ramp origin;
+                        # replacing it with a later sample would step the target.
+                        ramp_started = now
+                        hold_until = now + args_cli.startup_ramp_s + args_cli.startup_hold_s
+                    alpha = min((now - ramp_started) / args_cli.startup_ramp_s, 1.)
+                    startup_command[:20] = _startup_interpolated_positions(
+                        ramp_start_positions, hold_command[:20], now - ramp_started, args_cli.startup_ramp_s)
+                shared.set_action(startup_command, feedforward=gravity_ff)
+                if feedback_ready and alpha >= 1. and hold_until is not None and time.monotonic() >= hold_until:
                     break
                 io_stop_event.wait(1.0 / args_cli.loop_hz)
 
@@ -1278,11 +1407,18 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 joint_upper,
                 gripper_calibration,
             )
+            if gravity_controller is not None:
+                gravity_started = time.monotonic()
+                gravity_ff = _gravity_feedforward(
+                    gravity_controller, joint_pos, gripper_angle, projected_gravity)
+                timing.elapsed_ms("gravity_ms", gravity_started)
+                timing.observe("gravity_saturated_joints", int(gravity_controller.saturated.sum()))
             if args_cli.enable_motors:
                 shared.raise_if_failed()
                 shared.get_obs(max_age_s=args_cli.feedback_timeout_s)
-                receiver.get_data(max_age_s=args_cli.radar_timeout_s)
-                shared.set_action(command, observed_at=observed_at)
+                if receiver is not None:
+                    receiver.get_data(max_age_s=args_cli.radar_timeout_s)
+                shared.set_action(command, observed_at=observed_at, feedforward=gravity_ff)
 
             timing.tick("policy")
             timing.elapsed_ms("cycle_ms", start)
@@ -1301,6 +1437,11 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                     f"cmd_leg_deg={np.rad2deg(command[:20]).min():.1f}/{np.rad2deg(command[:20]).max():.1f} "
                     f"gravity={projected_gravity}"
                 )
+                if gravity_controller is not None:
+                    print("[GRAVITY] order=LB,LF,RB,RF each J1-5 "
+                          f"raw_nm={np.round(gravity_controller.raw.reshape(5, 4).T, 3).tolist()} "
+                          f"applied_nm={np.round(gravity_ff.reshape(5, 4).T, 3).tolist()} "
+                          f"limited_hw_indices={np.flatnonzero(gravity_controller.saturated).tolist()}")
 
             previous_action = action.copy()
             step += 1
@@ -1309,6 +1450,14 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                 last_timing_report = time.monotonic()
             if args_cli.max_steps > 0 and step >= args_cli.max_steps:
                 break
+    except Exception as exc:
+        io_stop_event.set()
+        if motor_session is not None:
+            try:
+                _report_motor_feedback(motor_session, shared, args_cli, exc)
+            except Exception as diagnostic_error:
+                print(f"[WARN] Motor feedback diagnostic: {diagnostic_error}")
+        raise
     finally:
         io_stop_event.set()
         # Close every resource even if one cleanup fails. No additional actuator commands.
@@ -1318,7 +1467,7 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
                     thread.join(timeout=1.0)
                 except Exception as exc:
                     print(f"[WARN] I/O thread cleanup: {exc}")
-        if step > 0:
+        if step > 0 or motor_session is not None:
             try:
                 _report_timing(timing, args_cli)
             except Exception as exc:

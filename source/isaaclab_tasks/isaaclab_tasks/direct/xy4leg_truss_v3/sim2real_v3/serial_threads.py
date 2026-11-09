@@ -77,7 +77,7 @@ def start_serial_tx_thread(
             else:
                 shared.wait_for_action(previous_sequence, timeout=period)
             shared.raise_if_failed()
-            act, published_at, sequence, observed_at = shared.action_snapshot(max_age_s=command_timeout_s)
+            act, feedforward, published_at, sequence, observed_at = shared.command_snapshot(max_age_s=command_timeout_s)
             if stop_event is not None and stop_event.is_set():
                 break
             if mode == "on_update" and sequence == previous_sequence:
@@ -86,7 +86,10 @@ def start_serial_tx_thread(
                 if feedback_ready_event is not None and feedback_ready_event.is_set():
                     shared.get_obs(max_age_s=feedback_timeout_s)
                 send_started = time.monotonic()
-                session.send_targets(act)
+                if feedforward is None:
+                    session.send_targets(act)
+                else:
+                    session.send_targets(act, feedforward_torque=feedforward)
                 if stats is not None:
                     stats.tick("tx")
                     stats.tick("tx_repeat" if sequence == previous_sequence else "tx_new")
@@ -103,7 +106,13 @@ def start_serial_tx_thread(
             run()
         except Exception as exc:
             # Stop software transmission and report; do not send a shutdown action.
-            shared.set_error("motor command thread", exc)
+            details = None
+            if hasattr(session, "feedback_diagnostics"):
+                try:
+                    details = session.feedback_diagnostics(max_age_s=feedback_timeout_s)
+                except Exception:
+                    pass  # Diagnostic failures must not replace the original error.
+            shared.set_error("motor command thread", exc, details=details)
 
     t = threading.Thread(target=loop, daemon=True)
     t.start()

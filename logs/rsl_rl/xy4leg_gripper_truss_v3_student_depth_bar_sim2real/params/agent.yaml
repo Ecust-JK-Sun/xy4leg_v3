@@ -1,0 +1,57 @@
+seed: 42
+device: cuda:0
+num_steps_per_env: 24
+max_iterations: 28000
+empirical_normalization: {}
+obs_groups:
+  student:
+  - deployable
+  - bar_estimate
+  teacher:
+  - policy
+clip_actions: 1.0
+check_for_nan: true
+save_interval: 500
+experiment_name: xy4leg_gripper_truss_v3_student_depth_bar_sim2real
+run_name: realcam_crop_noise_l2far_render12hz_from42000
+logger: tensorboard
+neptune_project: isaaclab
+wandb_project: isaaclab
+resume: true
+load_run: .*
+load_checkpoint: logs/rsl_rl/xy4leg_gripper_truss_v3_student_depth_bar_sim2real/2026-08-04_22-38-15_realcam_crop_noise_l2far_from41000/model_42000.pt
+class_name: DistillationRunner
+student:
+  class_name: MLPModel
+  hidden_dims:
+  - 512
+  - 256
+  - 128
+  activation: elu
+  obs_normalization: true
+  distribution_cfg:
+    class_name: GaussianDistribution
+    init_std: 0.03
+    std_type: log
+teacher:
+  class_name: MLPModel
+  hidden_dims:
+  - 512
+  - 256
+  - 128
+  activation: elu
+  obs_normalization: true
+  distribution_cfg:
+    class_name: GaussianDistribution
+    init_std: 0.0
+    std_type: log
+algorithm:
+  class_name: Distillation
+  num_learning_epochs: 5
+  learning_rate: 0.0003
+  gradient_length: 8
+  max_grad_norm: 1.0
+  optimizer: adam
+  loss_type: mse
+policy: {}
+teacher_checkpoint_path: ''

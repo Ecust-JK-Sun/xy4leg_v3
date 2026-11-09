@@ -69,7 +69,10 @@ class RealSenseCamera(CameraDriver):
         """
         import cv2
 
-        frames = self._pipeline.wait_for_frames(self._timeout_ms)
+        arrived, frames = self._pipeline.try_wait_for_frames(self._timeout_ms)
+        if not arrived:
+            # Keep an expected frame timeout distinct from SDK/device failures.
+            raise TimeoutError(f"RealSense frame did not arrive within {self._timeout_ms} ms")
         color_frame = frames.get_color_frame()
         depth_frame = frames.get_depth_frame()
         if not color_frame or not depth_frame:

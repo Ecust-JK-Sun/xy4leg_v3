@@ -50,6 +50,7 @@ class MotorSession:
         self.rx_invalid_frame_count = 0
         self.rx_backlog_bytes = np.zeros(4, dtype=int)
         self.rx_pending_bytes = np.zeros(4, dtype=int)
+        self.rx_last_frames = [[] for _ in range(4)]
 
     def _legs(self):
         return ((self.ctrl_lb, self.lb_ids, 0), (self.ctrl_lf, self.lf_ids, 1),
@@ -75,24 +76,34 @@ class MotorSession:
             self.enabled = False
             raise
 
-    def send_targets(self, target_pos: np.ndarray):
+    def send_targets(self, target_pos: np.ndarray, feedforward_torque: np.ndarray | None = None):
         """使用 MIT 模式发送目标位置（需事先 enable)。
         支持 24 DOF (6 关节/腿),第6个关节为力矩控制。
+        feedforward_torque 可选，20维，按硬件 joint-major 顺序传入 J1–J5 前馈（N·m）。
         """
         if not self.enabled:
             raise RuntimeError("Motor session is not enabled")
         target_pos = np.asarray(target_pos, dtype=np.float32)
         if target_pos.shape != (24,) or not np.isfinite(target_pos).all():
             raise ValueError("Expected exactly 24 finite hardware targets")
-        # NPZ 顺序: LB, LF, RB, RF (每腿6个关节)
+        if np.any(np.abs(target_pos[:20]) > 12.5) or np.any(np.abs(target_pos[20:]) > 28):
+            raise ValueError("Hardware targets exceed MIT position/torque encoding ranges")
+        if feedforward_torque is not None:
+            feedforward_torque = np.asarray(feedforward_torque, dtype=float)
+            if (feedforward_torque.shape != (20,) or not np.isfinite(feedforward_torque).all()
+                    or np.any(np.abs(feedforward_torque) > 28)):
+                raise ValueError("Expected 20 finite Joint1-5 feedforward torques in [-28,28]")
+        # Hardware joint-major order: LB1, LF1, RB1, RF1, LB2, ..., RF6.
         lb_target = target_pos[0::4]   # [0, 4, 8, 12, 16, 20]
         lf_target = target_pos[1::4]   # [1, 5, 9, 13, 17, 21]
         rb_target = target_pos[2::4]   # [2, 6, 10, 14, 18, 22]
         rf_target = target_pos[3::4]   # [3, 7, 11, 15, 19, 23]
-        self._send_leg(self.ctrl_lb, lb_target, self.lb_ids, self.kp_list, self.kd_list)
-        self._send_leg(self.ctrl_lf, lf_target, self.lf_ids, self.kp_list, self.kd_list)
-        self._send_leg(self.ctrl_rb, rb_target, self.rb_ids, self.kp_list, self.kd_list)
-        self._send_leg(self.ctrl_rf, rf_target, self.rf_ids, self.kp_list, self.kd_list)
+        for offset, (ctrl, targets, ids) in enumerate((
+            (self.ctrl_lb, lb_target, self.lb_ids), (self.ctrl_lf, lf_target, self.lf_ids),
+            (self.ctrl_rb, rb_target, self.rb_ids), (self.ctrl_rf, rf_target, self.rf_ids),
+        )):
+            leg_ff = None if feedforward_torque is None else feedforward_torque[offset::4]
+            self._send_leg(ctrl, targets, ids, self.kp_list, self.kd_list, leg_ff)
 
     def recv_feedback(self):
         """接收各路反馈并写入缓冲（仅接收，不发送）。"""
@@ -117,6 +128,39 @@ class MotorSession:
         return max(int(getattr(getattr(ctrl, "ser", None), "out_waiting", 0))
                    for ctrl, _, _ in self._legs())
 
+    def feedback_diagnostics(self, max_age_s=.5, now=None):
+        """Explain feedback rejection using cached data only; send no commands."""
+        motors, ports = [], []
+        with self._feedback_lock:
+            now = time.monotonic() if now is None else now
+            for leg, (ctrl, ids, offset) in zip(("LB", "LF", "RB", "RF"), self._legs()):
+                ports.append(dict(leg=leg, port=getattr(ctrl, "port", None),
+                                  backlog_bytes=int(self.rx_backlog_bytes[offset]),
+                                  pending_bytes=int(self.rx_pending_bytes[offset]),
+                                  last_frames_hex=list(self.rx_last_frames[offset])))
+                for joint, mid in enumerate(ids):
+                    index = offset + 4 * joint
+                    age = now - self.feedback_times[index]
+                    state, valid = int(self.feedback_states[index]), bool(self.feedback_valid[index])
+                    problems = []
+                    if state == -1:
+                        problems.append("missing")
+                    elif state != 1:
+                        problems.append(f"status={state}")
+                    elif not valid:
+                        problems.append("invalid_or_overflow")
+                    if not np.isfinite(age) or age < 0:
+                        problems.append("no_valid_timestamp")
+                    elif age > max_age_s:
+                        problems.append("stale")
+                    motors.append(dict(index=index, leg=leg, joint=joint + 1, motor_id=mid,
+                                       status=state, valid=valid,
+                                       age_ms=float(age * 1000.) if np.isfinite(age) else None,
+                                       valid_feedback_count=int(self.feedback_counts[index]), problems=problems))
+            frames, invalid = self.rx_frame_count, self.rx_invalid_frame_count
+        return dict(feedback_timeout_s=max_age_s, rx_frames=frames, rx_invalid_frames=invalid,
+                    ports=ports, motors=motors)
+
     def _store_feedback(self, feedback, index):
         # The feedback high nibble is a state: 0=disabled, 1=enabled, 8..14=fault.
         state = feedback.get("error_code", -1)
@@ -133,7 +177,7 @@ class MotorSession:
                 self.feedback_counts[index] += 1
         return valid
 
-    def _send_leg(self, ctrl, targets, ids, kp_list, kd_list):
+    def _send_leg(self, ctrl, targets, ids, kp_list, kd_list, torque_ff=None):
         """发送单腿的目标位置。
         对于 Joint6(索引5),使用力矩控制(pos=0, vel=0, tor=targets[5]）。
         """
@@ -142,7 +186,8 @@ class MotorSession:
                 if i == 5:  # Joint6: 力矩控制
                     cmd = ctrl.damiao_mit_command(pos=0.0, vel=0.0, kp=0.0, kd=0.0, tor=float(val), motor_id=mid)
                 else:  # Joint1-5: 位置控制
-                    cmd = ctrl.damiao_mit_command(pos=float(val), vel=0.0, kp=kp_i, kd=kd_i, tor=0.0, motor_id=mid)
+                    torque = 0.0 if torque_ff is None else float(torque_ff[i])
+                    cmd = ctrl.damiao_mit_command(pos=float(val), vel=0.0, kp=kp_i, kd=kd_i, tor=torque, motor_id=mid)
                 ctrl.send(cmd)
                 time.sleep(0.0002)
             except Exception as e:
@@ -155,6 +200,10 @@ class MotorSession:
             frames, pending, backlog, overflow = ctrl.receive_available()
             with self._feedback_lock:
                 self.rx_frame_count += len(frames)
+                if frames:
+                    self.rx_last_frames[start_idx] = [
+                        frame.hex() for frame in frames[-6:] if isinstance(frame, (bytes, bytearray))
+                    ]
                 self.rx_backlog_bytes[start_idx] = backlog
                 self.rx_pending_bytes[start_idx] = pending
                 if overflow:
